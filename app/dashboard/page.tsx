@@ -2,21 +2,30 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { getActivePackage, getNextSession, getUserSessions } from '@/lib/supabase-helpers';
 import type { User } from '@supabase/supabase-js';
+import type { Package, Session } from '@/lib/supabase-helpers';
+import PackageCard from '@/components/dashboard/PackageCard';
+import SessionCard from '@/components/dashboard/SessionCard';
 
 export default function DashboardPage() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<any>(null);
+    const [activePackage, setActivePackage] = useState<Package | null>(null);
+    const [nextSession, setNextSession] = useState<Session | null>(null);
+    const [recentSessions, setRecentSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        checkUser();
+        loadDashboard();
     }, []);
 
-    const checkUser = async () => {
+    const loadDashboard = async () => {
         try {
+            // Get user
             const { data: { user } } = await supabase.auth.getUser();
 
             if (!user) {
@@ -26,7 +35,7 @@ export default function DashboardPage() {
 
             setUser(user);
 
-            // Fetch profile
+            // Get profile
             const { data: profileData } = await supabase
                 .from('profiles')
                 .select('*')
@@ -34,9 +43,21 @@ export default function DashboardPage() {
                 .single();
 
             setProfile(profileData);
+
+            // Get active package
+            const { data: packageData } = await getActivePackage(user.id);
+            setActivePackage(packageData);
+
+            // Get next session
+            const { data: nextSessionData } = await getNextSession(user.id);
+            setNextSession(nextSessionData);
+
+            // Get recent sessions
+            const { data: sessionsData } = await getUserSessions(user.id);
+            setRecentSessions(sessionsData?.slice(0, 3) || []);
+
         } catch (error) {
-            console.error('Error:', error);
-            router.push('/login');
+            console.error('Error loading dashboard:', error);
         } finally {
             setLoading(false);
         }
@@ -64,17 +85,27 @@ export default function DashboardPage() {
             {/* Header */}
             <header className="bg-white shadow-sm border-b border-primary-100">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-gradient">Fitbuddy</h1>
-                    <div className="flex items-center gap-4">
-                        <span className="text-gray-700">
-                            Bonjour, <span className="font-semibold">{profile?.first_name || 'Client'}</span> !
-                        </span>
-                        <button
-                            onClick={handleLogout}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
-                        >
-                            Déconnexion
-                        </button>
+                    <Link href="/" className="text-2xl font-bold text-gradient">
+                        Fitbuddy
+                    </Link>
+                    <div className="flex items-center gap-6">
+                        <Link href="/dashboard" className="text-sm font-semibold text-primary-600">
+                            Dashboard
+                        </Link>
+                        <Link href="/dashboard/sessions" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                            Mes sessions
+                        </Link>
+                        <div className="flex items-center gap-4 border-l border-gray-300 pl-6">
+                            <span className="text-gray-700">
+                                Bonjour, <span className="font-semibold">{profile?.first_name || 'Client'}</span> !
+                            </span>
+                            <button
+                                onClick={handleLogout}
+                                className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                            >
+                                Déconnexion
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -82,93 +113,78 @@ export default function DashboardPage() {
             {/* Main Content */}
             <main className="container mx-auto px-4 py-10">
                 <div className="max-w-4xl mx-auto">
-                    {/* Welcome Card */}
-                    <div className="bg-gradient-fitbuddy rounded-2xl p-8 text-white mb-8 shadow-xl">
-                        <h2 className="text-3xl font-bold mb-2">
-                            Bienvenue dans votre espace Fitbuddy ! 🎉
-                        </h2>
-                        <p className="text-white/90">
-                            Votre portail client est maintenant actif. Gérez vos sessions de coaching, suivez votre progression et bien plus encore.
-                        </p>
+                    {/* Welcome */}
+                    <h1 className="text-3xl font-bold text-gray-900 mb-8">
+                        Tableau de bord
+                    </h1>
+
+                    {/* Package Card */}
+                    <div className="mb-8">
+                        <PackageCard package={activePackage} loading={loading} />
                     </div>
 
-                    {/* Info Cards */}
-                    <div className="grid md:grid-cols-2 gap-6 mb-8">
-                        {/* Package Card - Placeholder */}
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-primary-100">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                                    <span className="text-2xl">📦</span>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900">Votre forfait</h3>
+                    {/* Next Session */}
+                    {nextSession && (
+                        <div className="mb-8">
+                            <h2 className="text-xl font-bold text-gray-900 mb-4">📅 Prochaine session</h2>
+                            <SessionCard session={nextSession} />
+                        </div>
+                    )}
+
+                    {/* Quick Actions */}
+                    <div className="grid md:grid-cols-2 gap-4 mb-8">
+                        <Link
+                            href="/dashboard/book"
+                            className="bg-gradient-fitbuddy text-white p-6 rounded-xl hover:scale-105 transition-all shadow-lg group"
+                        >
+                            <div className="text-4xl mb-2">📅</div>
+                            <h3 className="text-lg font-bold mb-1">Réserver une session</h3>
+                            <p className="text-white/90 text-sm">Planifiez votre prochain coaching</p>
+                        </Link>
+
+                        <Link
+                            href="/dashboard/sessions"
+                            className="bg-white border-2 border-primary-200 p-6 rounded-xl hover:border-primary-400 hover:shadow-lg transition-all group"
+                        >
+                            <div className="text-4xl mb-2">📖</div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">Historique complet</h3>
+                            <p className="text-gray-600 text-sm">Voir toutes vos sessions</p>
+                        </Link>
+                    </div>
+
+                    {/* Recent Sessions */}
+                    {recentSessions.length > 0 && (
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-bold text-gray-900">Sessions récentes</h2>
+                                <Link href="/dashboard/sessions" className="text-sm text-primary-600 hover:text-primary-700 font-semibold">
+                                    Voir tout →
+                                </Link>
                             </div>
-                            <p className="text-gray-600 mb-4">
-                                Aucun forfait actif pour le moment.
-                            </p>
-                            <a
-                                href="/"
-                                className="inline-block text-primary-600 font-semibold hover:text-primary-700"
-                            >
-                                Choisir un forfait →
-                            </a>
-                        </div>
-
-                        {/* Sessions Card - Placeholder */}
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-primary-100">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                                    <span className="text-2xl">📅</span>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900">Prochaine session</h3>
+                            <div className="space-y-3">
+                                {recentSessions.map((session) => (
+                                    <SessionCard key={session.id} session={session} />
+                                ))}
                             </div>
+                        </div>
+                    )}
+
+                    {/* No sessions */}
+                    {recentSessions.length === 0 && !nextSession && (
+                        <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
+                            <div className="text-6xl mb-4">📅</div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune session programmée</h3>
                             <p className="text-gray-600 mb-4">
-                                Aucune session programmée.
+                                Réservez votre première session pour commencer votre transformation !
                             </p>
-                            <a
-                                href="/#signup"
-                                className="inline-block text-primary-600 font-semibold hover:text-primary-700"
+                            <Link
+                                href="/dashboard/book"
+                                className="inline-block bg-gradient-fitbuddy text-white font-semibold px-6 py-3 rounded-lg hover:scale-105 transition-all"
                             >
-                                Réserver une session →
-                            </a>
+                                Réserver maintenant
+                            </Link>
                         </div>
-                    </div>
-
-                    {/* Coming Soon Section */}
-                    <div className="bg-white rounded-xl p-8 shadow-lg border border-primary-100">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">🚧 Fonctionnalités à venir</h3>
-                        <ul className="space-y-3">
-                            <li className="flex items-start gap-3">
-                                <span className="text-primary-600">✓</span>
-                                <span className="text-gray-700">Visualisation de votre forfait et sessions restantes</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <span className="text-primary-600">✓</span>
-                                <span className="text-gray-700">Réservation de sessions directement depuis le dashboard</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <span className="text-primary-600">✓</span>
-                                <span className="text-gray-700">Historique complet de vos sessions</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <span className="text-primary-600">✓</span>
-                                <span className="text-gray-700">Gestion de votre profil</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <span className="text-primary-600">✓</span>
-                                <span className="text-gray-700">Paiements en ligne sécurisés (Stripe)</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* User Info (for debugging) */}
-                    <div className="mt-8 bg-gray-50 rounded-xl p-6 border border-gray-200">
-                        <h4 className="font-semibold text-gray-700 mb-2">Informations du compte :</h4>
-                        <div className="text-sm text-gray-600 space-y-1">
-                            <p><strong>Email:</strong> {user?.email}</p>
-                            <p><strong>ID:</strong> {user?.id}</p>
-                            <p><strong>Créé le:</strong> {user?.created_at && new Date(user.created_at).toLocaleDateString('fr-FR')}</p>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </main>
         </div>
