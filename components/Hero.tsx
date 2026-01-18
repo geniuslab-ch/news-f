@@ -1,52 +1,75 @@
 interface HeroProps {
-    title: string;
-    subtitle: string;
+    lang: 'fr' | 'en';
     ctaText: string;
     programSlug: string;
 }
 
-export default function Hero({ title, subtitle, ctaText, programSlug }: HeroProps) {
+export default function Hero({ lang, ctaText, programSlug }: HeroProps) {
     return (
-        <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 overflow-hidden">
-            {/* Decorative background elements */}
-            <div className="absolute inset-0 opacity-30">
-                <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-                <div className="absolute top-40 right-10 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-                <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+            {/* Video Background */}
+            <div className="absolute inset-0 w-full h-full">
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                    key={lang} // Force re-render when language changes
+                >
+                    <source src={`/${lang === 'fr' ? 'video-fr' : 'video-en'}.webm`} type="video/webm" />
+                </video>
+                {/* Dark overlay for better CTA visibility */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
             </div>
 
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
-                        {title}
-                    </h1>
-                    <p className="text-lg md:text-xl text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
-                        {subtitle}
-                    </p>
+            {/* CTA Button - positioned at bottom */}
+            <div className="relative z-10 w-full px-4 pb-20">
+                <div className="container mx-auto max-w-4xl text-center">
                     <a
                         href="#signup"
-                        className="inline-block bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-lg px-10 py-4 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+                        className="inline-block bg-gradient-fitbuddy text-white font-bold text-xl px-12 py-5 rounded-full hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-primary-400/50 btn-shine"
                     >
                         {ctaText}
                     </a>
 
-                    <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md">
-                            <div className="text-4xl mb-3">📹</div>
-                            <h3 className="font-semibold text-gray-900 mb-2">100% en visio</h3>
-                            <p className="text-sm text-gray-600">Google Meet, depuis chez vous</p>
+                    {/* Three key benefits cards - more visible on video */}
+                    <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                        <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl card-hover">
+                            <div className="text-5xl mb-3">📹</div>
+                            <h3 className="font-bold text-gray-900 mb-2">
+                                {lang === 'fr' ? '100% en visio' : '100% Online'}
+                            </h3>
+                            <p className="text-sm text-gray-700">
+                                {lang === 'fr' ? 'Google Meet, depuis chez vous' : 'Google Meet, from your home'}
+                            </p>
                         </div>
-                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md">
-                            <div className="text-4xl mb-3">👤</div>
-                            <h3 className="font-semibold text-gray-900 mb-2">Coach dédié</h3>
-                            <p className="text-sm text-gray-600">Accompagnement personnalisé</p>
+                        <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl card-hover">
+                            <div className="text-5xl mb-3">💪</div>
+                            <h3 className="font-bold text-gray-900 mb-2">
+                                {lang === 'fr' ? 'Coach dédié' : 'Dedicated Coach'}
+                            </h3>
+                            <p className="text-sm text-gray-700">
+                                {lang === 'fr' ? 'Accompagnement personnalisé' : 'Personalized support'}
+                            </p>
                         </div>
-                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md">
-                            <div className="text-4xl mb-3">🌍</div>
-                            <h3 className="font-semibold text-gray-900 mb-2">Multilingue</h3>
-                            <p className="text-sm text-gray-600">FR, EN et plus</p>
+                        <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl card-hover">
+                            <div className="text-5xl mb-3">🌍</div>
+                            <h3 className="font-bold text-gray-900 mb-2">
+                                {lang === 'fr' ? 'Multilingue' : 'Multilingual'}
+                            </h3>
+                            <p className="text-sm text-gray-700">
+                                FR, EN
+                            </p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Scroll indicator */}
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+                <div className="w-8 h-12 rounded-full border-2 border-white/50 flex items-start justify-center p-2">
+                    <div className="w-1 h-3 bg-white/70 rounded-full animate-pulse"></div>
                 </div>
             </div>
         </section>

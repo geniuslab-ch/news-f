@@ -20,10 +20,10 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
     return (
         <div className="min-h-screen">
             {/* Language toggle - fixed top right */}
-            <div className="fixed top-20 right-4 z-40">
+            <div className="fixed top-20 right-4 z-50">
                 <button
                     onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg shadow-lg hover:from-emerald-700 hover:to-teal-700 transition-all"
+                    className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-fitbuddy rounded-full shadow-lg hover:scale-105 transition-all duration-300 btn-shine"
                 >
                     {lang === 'fr' ? '🇬🇧 EN' : '🇫🇷 FR'}
                 </button>
@@ -32,8 +32,7 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
             <Header />
 
             <Hero
-                title={program.heroTitle[lang]}
-                subtitle={program.heroSubtitle[lang]}
+                lang={lang}
                 ctaText={program.cta[lang]}
                 programSlug={program.slug}
             />
@@ -59,7 +58,7 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
             <FAQ faqItems={program.faq[lang]} lang={lang} />
 
             {/* CTA + Signup Section */}
-            <section id="signup" className="py-20 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600">
+            <section id="signup" className="py-20 bg-gradient-fitbuddy">
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl mx-auto">
                         <div className="text-center mb-12">
@@ -85,7 +84,7 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
                             />
                         </div>
 
-                        <p className="text-center text-white/80 text-sm mt-8">
+                        <p className="text-center text-white/90 text-sm mt-8">
                             {lang === 'fr'
                                 ? '⚠️ Important : Les programmes Fitbuddy ne remplacent pas un avis médical. Consultez votre médecin avant de commencer.'
                                 : '⚠️ Important: Fitbuddy programs do not replace medical advice. Consult your doctor before starting.'}
