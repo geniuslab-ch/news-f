@@ -13,7 +13,7 @@ export default function BookPage() {
     const [user, setUser] = useState<User | null>(null);
     const [activePackage, setActivePackage] = useState<Package | null>(null);
     const [loading, setLoading] = useState(true);
-    const [selectedType, setSelectedType] = useState<'discovery' | 'coaching'>('coaching');
+    const [selectedType, setSelectedType] = useState<'discovery' | 'coaching' | 'coaching_followup'>('coaching');
 
     useEffect(() => {
         loadUser();
@@ -49,7 +49,9 @@ export default function BookPage() {
     // Build Cal.com URL with user info
     const calLink = selectedType === 'discovery'
         ? `https://app.cal.eu/fitbuddy/15min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`
-        : `https://app.cal.eu/fitbuddy/45min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`;
+        : selectedType === 'coaching_followup'
+            ? `https://app.cal.eu/fitbuddy/suivi-45min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`
+            : `https://app.cal.eu/fitbuddy/45min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`;
 
     if (loading) {
         return (
@@ -117,8 +119,8 @@ export default function BookPage() {
 
                         <div className="space-y-3">
                             <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg border-2 transition ${selectedType === 'discovery'
-                                    ? 'border-primary-500 bg-primary-50'
-                                    : 'border-gray-200 hover:border-primary-300'
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-primary-300'
                                 }`}>
                                 <input
                                     type="radio"
@@ -136,8 +138,8 @@ export default function BookPage() {
                             </label>
 
                             <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg border-2 transition ${selectedType === 'coaching'
-                                    ? 'border-primary-500 bg-primary-50'
-                                    : 'border-gray-200 hover:border-primary-300'
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-primary-300'
                                 }`}>
                                 <input
                                     type="radio"
@@ -150,6 +152,26 @@ export default function BookPage() {
                                     <span className="font-semibold text-gray-900">💪 Session de coaching (45 min)</span>
                                     <p className="text-xs text-gray-600 mt-1">
                                         Coaching personnalisé pour atteindre vos objectifs fitness.
+                                        {activePackage && <span className="block mt-1 text-primary-600 font-semibold">Cette session sera déduite de votre forfait.</span>}
+                                    </p>
+                                </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg border-2 transition ${selectedType === 'coaching_followup'
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-primary-300'
+                                }`}>
+                                <input
+                                    type="radio"
+                                    name="sessionType"
+                                    checked={selectedType === 'coaching_followup'}
+                                    onChange={() => setSelectedType('coaching_followup')}
+                                    className="mt-1 w-5 h-5"
+                                />
+                                <div>
+                                    <span className="font-semibold text-gray-900">🔄 Coaching Suivi (45 min)</span>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        Session de suivi pour continuer votre progression.
                                         {activePackage && <span className="block mt-1 text-primary-600 font-semibold">Cette session sera déduite de votre forfait.</span>}
                                     </p>
                                 </div>

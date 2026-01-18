@@ -21,7 +21,7 @@ export interface Session {
     user_id: string;
     package_id?: string;
     coach_name?: string;
-    session_type: 'discovery' | 'coaching';
+    session_type: 'discovery' | 'coaching' | 'coaching_followup';
     session_date: string;
     duration_minutes: number;
     google_meet_link?: string;

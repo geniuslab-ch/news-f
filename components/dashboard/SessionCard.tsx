@@ -29,7 +29,9 @@ export default function SessionCard({ session, onCancel, cancelling }: SessionCa
                     {/* Session Type & Duration */}
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-sm text-gray-700">
-                            {session.session_type === 'discovery' ? '🎁 Découverte' : '💪 Coaching'}
+                            {session.session_type === 'discovery' && '🎁 Découverte'}
+                            {session.session_type === 'coaching' && '💪 Coaching'}
+                            {session.session_type === 'coaching_followup' && '🔄 Coaching Suivi'}
                         </span>
                         <span className="text-xs text-gray-500">•</span>
                         <span className="text-sm text-gray-600">{session.duration_minutes} min</span>
@@ -59,6 +61,21 @@ export default function SessionCard({ session, onCancel, cancelling }: SessionCa
                 >
                     🎥 Rejoindre la session
                 </a>
+            )}
+
+            {/* Add to Calendar Button */}
+            {isFuture && session.status === 'scheduled' && (
+                <button
+                    onClick={() => {
+                        if (typeof window !== 'undefined') {
+                            const { downloadICS } = require('@/lib/calendar');
+                            downloadICS(session);
+                        }
+                    }}
+                    className="block w-full bg-green-500 text-white text-center font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition mb-2"
+                >
+                    📅 Ajouter au calendrier
+                </button>
             )}
 
             {/* Actions */}
