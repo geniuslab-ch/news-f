@@ -9,6 +9,7 @@ import WhatYouGet from '@/components/WhatYouGet';
 import HowItWorks from '@/components/HowItWorks';
 import ProgramDetails from '@/components/ProgramDetails';
 import GoogleMeetSection from '@/components/GoogleMeetSection';
+import PricingSection from '@/components/PricingSection';
 import Testimonials from '@/components/Testimonials';
 import FAQ from '@/components/FAQ';
 import SignupForm from '@/components/SignupForm';
@@ -42,6 +43,8 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
             />
 
             <GoogleMeetSection lang={lang} />
+
+            <PricingSection lang={lang} />
 
             <Testimonials testimonials={program.testimonials[lang]} lang={lang} />
 
