@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { assignCoach } from '@/lib/coachAssignment';
 import Script from 'next/script';
 
@@ -43,36 +43,64 @@ export default function SignupForm({
     const [submitted, setSubmitted] = useState(false);
     const [assignedCoach, setAssignedCoach] = useState<string | null>(null);
     const [noCoachAvailable, setNoCoachAvailable] = useState(false);
-    const [calLoaded, setCalLoaded] = useState(false);
+    const calInitialized = useRef(false);
 
     // Initialize Cal.com when script loads and appointment type changes
     useEffect(() => {
-        if (!calLoaded || typeof window.Cal === 'undefined') return;
+        // Wait for Cal to be available
+        const initCal = () => {
+            if (typeof window === 'undefined' || !window.Cal) {
+                return false;
+            }
 
-        const namespace = formData.wantsDiscovery ? '15min' : '45min';
-        const calLink = formData.wantsDiscovery ? 'fitbuddy/15min' : 'fitbuddy/45min';
-        const elementId = formData.wantsDiscovery ? 'my-cal-inline-15min' : 'my-cal-inline-45min';
+            const namespace = formData.wantsDiscovery ? '15min' : '45min';
+            const calLink = formData.wantsDiscovery ? 'fitbuddy/15min' : 'fitbuddy/45min';
+            const elementId = formData.wantsDiscovery ? 'my-cal-inline-15min' : 'my-cal-inline-45min';
 
-        // Small delay to ensure DOM is ready
-        setTimeout(() => {
             try {
+                // Initialize Cal
                 window.Cal('init', namespace, { origin: 'https://app.cal.eu' });
 
+                // Configure inline calendar
                 window.Cal.ns[namespace]('inline', {
                     elementOrSelector: `#${elementId}`,
                     config: { layout: 'month_view' },
                     calLink: calLink,
                 });
 
+                // Set UI options
                 window.Cal.ns[namespace]('ui', {
                     hideEventTypeDetails: false,
                     layout: 'month_view'
                 });
+
+                console.log(`Cal.com initialized: ${namespace}`);
+                return true;
             } catch (error) {
                 console.error('Cal.com initialization error:', error);
+                return false;
+            }
+        };
+
+        // Try to initialize immediately
+        if (initCal()) {
+            calInitialized.current = true;
+            return;
+        }
+
+        // If not ready, poll until Cal is available
+        const checkInterval = setInterval(() => {
+            if (initCal()) {
+                calInitialized.current = true;
+                clearInterval(checkInterval);
             }
         }, 100);
-    }, [calLoaded, formData.wantsDiscovery]);
+
+        // Cleanup
+        return () => {
+            clearInterval(checkInterval);
+        };
+    }, [formData.wantsDiscovery]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -161,10 +189,12 @@ export default function SignupForm({
             {/* Cal.com Script */}
             <Script
                 src="https://app.cal.eu/embed/embed.js"
-                strategy="lazyOnload"
+                strategy="afterInteractive"
                 onLoad={() => {
-                    console.log('Cal.com script loaded');
-                    setCalLoaded(true);
+                    console.log('Cal.com script loaded successfully');
+                }}
+                onError={(e) => {
+                    console.error('Failed to load Cal.com script:', e);
                 }}
             />
 
@@ -265,18 +295,16 @@ export default function SignupForm({
                     <label className="block text-sm font-semibold text-gray-900 mb-3">
                         {t.calendarTitle} *
                     </label>
-                    <div
-                        className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden min-h-[600px]"
-                    >
+                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
                         {formData.wantsDiscovery ? (
                             <div
                                 id="my-cal-inline-15min"
-                                style={{ width: '100%', height: '600px', overflow: 'scroll' }}
+                                style={{ width: '100%', height: '600px', overflow: 'auto' }}
                             />
                         ) : (
                             <div
                                 id="my-cal-inline-45min"
-                                style={{ width: '100%', height: '600px', overflow: 'scroll' }}
+                                style={{ width: '100%', height: '600px', overflow: 'auto' }}
                             />
                         )}
                     </div>

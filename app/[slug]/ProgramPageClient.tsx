@@ -11,7 +11,7 @@ import ProgramDetails from '@/components/ProgramDetails';
 import GoogleMeetSection from '@/components/GoogleMeetSection';
 import PricingSection from '@/components/PricingSection';
 import Testimonials from '@/components/Testimonials';
-import InstagramFeed from '@/components/InstagramFeed';
+import TikTokFeed from '@/components/TikTokFeed';
 import FAQ from '@/components/FAQ';
 import SignupForm from '@/components/SignupForm';
 import type { ProgramConfig } from '@/lib/programsConfig';
@@ -49,7 +49,7 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
 
             <Testimonials testimonials={program.testimonials[lang]} lang={lang} />
 
-            <InstagramFeed lang={lang} />
+            <TikTokFeed lang={lang} />
 
             <FAQ faqItems={program.faq[lang]} lang={lang} />
 
