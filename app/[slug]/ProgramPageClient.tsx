@@ -19,17 +19,7 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
 
     return (
         <div className="min-h-screen">
-            {/* Language toggle - fixed top right */}
-            <div className="fixed top-20 right-4 z-50">
-                <button
-                    onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-                    className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-fitbuddy rounded-full shadow-lg hover:scale-105 transition-all duration-300 btn-shine"
-                >
-                    {lang === 'fr' ? '🇬🇧 EN' : '🇫🇷 FR'}
-                </button>
-            </div>
-
-            <Header />
+            <Header lang={lang} onLanguageChange={setLang} />
 
             <Hero
                 lang={lang}
