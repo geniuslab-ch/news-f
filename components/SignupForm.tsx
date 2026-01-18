@@ -129,7 +129,7 @@ export default function SignupForm({
                             </p>
                         )}
                         <a
-                            href={calLink}
+                            href={`${calLink}?name=${encodeURIComponent(formData.firstName)}&email=${encodeURIComponent(formData.email)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-block bg-gradient-fitbuddy text-white font-bold text-lg px-10 py-5 rounded-full hover:scale-110 transition-all duration-300 shadow-2xl btn-shine animate-pulse"
