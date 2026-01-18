@@ -30,6 +30,21 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+      {/* Header with Login Button */}
+      <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            Fitbuddy
+          </Link>
+          <Link
+            href="/dashboard"
+            className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg"
+          >
+            Mon Espace
+          </Link>
+        </div>
+      </header>
+
       <div className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6">

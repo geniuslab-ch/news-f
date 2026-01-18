@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { getActivePackage, getNextSession, getUserSessions } from '@/lib/supabase-helpers';
+import { getActivePackage, getNextSession, getUserSessions, cancelSession } from '@/lib/supabase-helpers';
 import type { User } from '@supabase/supabase-js';
 import type { Package, Session } from '@/lib/supabase-helpers';
 import PackageCard from '@/components/dashboard/PackageCard';
@@ -18,6 +18,7 @@ export default function DashboardPage() {
     const [nextSession, setNextSession] = useState<Session | null>(null);
     const [recentSessions, setRecentSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
+    const [cancellingId, setCancellingId] = useState<string | null>(null);
 
     useEffect(() => {
         loadDashboard();
@@ -67,6 +68,25 @@ export default function DashboardPage() {
         await supabase.auth.signOut();
         router.push('/login');
         router.refresh();
+    };
+
+    const handleCancel = async (sessionId: string) => {
+        if (!user) return;
+
+        const confirmed = window.confirm('Êtes-vous sûr de vouloir annuler cette session ?');
+        if (!confirmed) return;
+
+        setCancellingId(sessionId);
+
+        try {
+            await cancelSession(sessionId, user.id);
+            await loadDashboard(); // Refresh dashboard
+        } catch (error) {
+            console.error('Error cancelling session:', error);
+            alert('Erreur lors de l\'annulation. Veuillez réessayer.');
+        } finally {
+            setCancellingId(null);
+        }
     };
 
     if (loading) {
@@ -127,7 +147,7 @@ export default function DashboardPage() {
                     {nextSession && (
                         <div className="mb-8">
                             <h2 className="text-xl font-bold text-gray-900 mb-4">📅 Prochaine session</h2>
-                            <SessionCard session={nextSession} />
+                            <SessionCard session={nextSession} onCancel={handleCancel} cancelling={cancellingId === nextSession.id} />
                         </div>
                     )}
 
@@ -163,7 +183,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="space-y-3">
                                 {recentSessions.map((session) => (
-                                    <SessionCard key={session.id} session={session} />
+                                    <SessionCard key={session.id} session={session} onCancel={handleCancel} cancelling={cancellingId === session.id} />
                                 ))}
                             </div>
                         </div>
