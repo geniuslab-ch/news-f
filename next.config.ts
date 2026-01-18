@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    // Pas d'export statique - on laisse Next.js en mode normal
+    output: 'export',
+    distDir: 'out',
+    trailingSlash: true,
     images: {
         unoptimized: true,
     },
+    assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
 };
 
 export default nextConfig;
