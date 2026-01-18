@@ -18,6 +18,12 @@ interface SignupFormProps {
     lang: 'fr' | 'en';
 }
 
+declare global {
+    interface Window {
+        Cal?: any;
+    }
+}
+
 export default function SignupForm({
     programSlug,
     programTitle,
@@ -30,7 +36,7 @@ export default function SignupForm({
         email: '',
         language: 'fr',
         goal: '',
-        wantsDiscovery: false, // New: discovery call checkbox
+        wantsDiscovery: false,
         consent: false,
     });
 
@@ -39,17 +45,38 @@ export default function SignupForm({
     const [noCoachAvailable, setNoCoachAvailable] = useState(false);
     const [calLoaded, setCalLoaded] = useState(false);
 
+    // Initialize Cal.com when script loads and appointment type changes
     useEffect(() => {
-        // Initialize Cal.com when component mounts
-        if ((window as any).Cal) {
-            setCalLoaded(true);
-        }
-    }, []);
+        if (!calLoaded || typeof window.Cal === 'undefined') return;
+
+        const namespace = formData.wantsDiscovery ? '15min' : '45min';
+        const calLink = formData.wantsDiscovery ? 'fitbuddy/15min' : 'fitbuddy/45min';
+        const elementId = formData.wantsDiscovery ? 'my-cal-inline-15min' : 'my-cal-inline-45min';
+
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+            try {
+                window.Cal('init', namespace, { origin: 'https://app.cal.eu' });
+
+                window.Cal.ns[namespace]('inline', {
+                    elementOrSelector: `#${elementId}`,
+                    config: { layout: 'month_view' },
+                    calLink: calLink,
+                });
+
+                window.Cal.ns[namespace]('ui', {
+                    hideEventTypeDetails: false,
+                    layout: 'month_view'
+                });
+            } catch (error) {
+                console.error('Cal.com initialization error:', error);
+            }
+        }, 100);
+    }, [calLoaded, formData.wantsDiscovery]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Attribution du coach
         const coach = assignCoach(formData.language, programSlug);
 
         if (!coach) {
@@ -62,7 +89,6 @@ export default function SignupForm({
         setNoCoachAvailable(false);
         setSubmitted(true);
 
-        // Tracking placeholder (Google Tag Manager / dataLayer)
         if (typeof window !== 'undefined' && (window as any).dataLayer) {
             (window as any).dataLayer.push({
                 event: 'form_submission',
@@ -85,7 +111,7 @@ export default function SignupForm({
             discoveryTitle: 'Type de rendez-vous',
             discoveryOption: '🎁 Je veux d\'abord un appel découverte gratuit de 15 min',
             firstSessionOption: '💪 Je suis prêt(e) pour ma première session de 45 min',
-            calendarTitle: 'Choisissezvotre créneau',
+            calendarTitle: 'Choisissez votre créneau',
             consent: 'J\'accepte de recevoir des communications de Fitbuddy et j\'ai lu la politique de confidentialité',
             submit: ctaText.fr,
             successTitle: 'Merci ! 🎉',
@@ -136,7 +162,10 @@ export default function SignupForm({
             <Script
                 src="https://app.cal.eu/embed/embed.js"
                 strategy="lazyOnload"
-                onLoad={() => setCalLoaded(true)}
+                onLoad={() => {
+                    console.log('Cal.com script loaded');
+                    setCalLoaded(true);
+                }}
             />
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -204,7 +233,7 @@ export default function SignupForm({
                     </select>
                 </div>
 
-                {/* Discovery Call Checkbox */}
+                {/* Discovery Call Selection */}
                 <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
                     <h4 className="font-bold text-gray-900 mb-3">{t.discoveryTitle}</h4>
                     <div className="space-y-3">
@@ -236,48 +265,18 @@ export default function SignupForm({
                     <label className="block text-sm font-semibold text-gray-900 mb-3">
                         {t.calendarTitle} *
                     </label>
-                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden" style={{ height: '600px' }}>
+                    <div
+                        className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden min-h-[600px]"
+                    >
                         {formData.wantsDiscovery ? (
-                            // 15min Discovery Call Calendar
                             <div
-                                style={{ width: '100%', height: '100%', overflow: 'scroll' }}
                                 id="my-cal-inline-15min"
-                                dangerouslySetInnerHTML={{
-                                    __html: `
-                    <script type="text/javascript">
-                      if (window.Cal) {
-                        Cal("init", "15min", {origin:"https://app.cal.eu"});
-                        Cal.ns["15min"]("inline", {
-                          elementOrSelector:"#my-cal-inline-15min",
-                          config: {"layout":"month_view"},
-                          calLink: "fitbuddy/15min",
-                        });
-                        Cal.ns["15min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
-                      }
-                    </script>
-                  `
-                                }}
+                                style={{ width: '100%', height: '600px', overflow: 'scroll' }}
                             />
                         ) : (
-                            // 45min First Session Calendar
                             <div
-                                style={{ width: '100%', height: '100%', overflow: 'scroll' }}
                                 id="my-cal-inline-45min"
-                                dangerouslySetInnerHTML={{
-                                    __html: `
-                    <script type="text/javascript">
-                      if (window.Cal) {
-                        Cal("init", "45min", {origin:"https://app.cal.eu"});
-                        Cal.ns["45min"]("inline", {
-                          elementOrSelector:"#my-cal-inline-45min",
-                          config: {"layout":"month_view"},
-                          calLink: "fitbuddy/45min",
-                        });
-                        Cal.ns["45min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
-                      }
-                    </script>
-                  `
-                                }}
+                                style={{ width: '100%', height: '600px', overflow: 'scroll' }}
                             />
                         )}
                     </div>

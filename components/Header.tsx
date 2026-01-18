@@ -33,7 +33,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
             <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-3">
                     <Image
-                        src="/logo.png"
+                        src="/logo%20(1)FITBUDDY.png"
                         alt="Fitbuddy Logo"
                         width={180}
                         height={60}
