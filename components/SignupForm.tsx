@@ -103,10 +103,10 @@ export default function SignupForm({
 
     const t = labels[lang];
 
-    // Direct Cal.com links
+    // Direct Cal.com links (app.cal.eu domain)
     const calLink = formData.wantsDiscovery
-        ? 'https://cal.com/fitbuddy/15min'
-        : 'https://cal.com/fitbuddy/45min';
+        ? 'https://app.cal.eu/fitbuddy/15min'
+        : 'https://app.cal.eu/fitbuddy/45min';
 
     if (submitted) {
         return (
