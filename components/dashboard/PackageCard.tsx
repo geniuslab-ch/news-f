@@ -52,7 +52,9 @@ export default function PackageCard({ package: pkg, loading }: PackageCardProps)
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-gray-900">{details.name}</h3>
-                        <p className="text-sm text-gray-600">CHF {pkg.price_chf.toFixed(2)}</p>
+                        {pkg.price_chf && (
+                            <p className="text-sm text-gray-600">CHF {pkg.price_chf.toFixed(2)}</p>
+                        )}
                     </div>
                 </div>
                 <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
