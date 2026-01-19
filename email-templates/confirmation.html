@@ -1,0 +1,137 @@
+<!-- 
+Supabase Email Template - Account Confirmation
+Pour Fitbuddy.ch
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmez votre compte Fitbuddy</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f3f4f6;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    
+                    <!-- Header avec Logo -->
+                    <tr>
+                        <td align="center" style="padding: 40px 40px 20px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 16px 16px 0 0;">
+                            <img src="https://fitbuddy.ch/logo%20(1)FITBUDDY.png" alt="Fitbuddy" width="180" style="display: block; margin: 0 auto;">
+                        </td>
+                    </tr>
+                    
+                    <!-- Contenu Principal -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <h1 style="margin: 0 0 20px; font-size: 28px; font-weight: 700; color: #111827; text-align: center;">
+                                Bienvenue chez Fitbuddy ! 🎉
+                            </h1>
+                            
+                            <p style="margin: 0 0 20px; font-size: 16px; line-height: 24px; color: #4b5563; text-align: center;">
+                                Merci de vous être inscrit. Pour activer votre compte et commencer votre transformation, veuillez confirmer votre adresse email.
+                            </p>
+                            
+                            <!-- Bouton de Confirmation -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ .ConfirmationURL }}" 
+                                           style="display: inline-block; 
+                                                  padding: 16px 40px; 
+                                                  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); 
+                                                  color: #ffffff; 
+                                                  text-decoration: none; 
+                                                  font-weight: 700; 
+                                                  font-size: 16px; 
+                                                  border-radius: 9999px; 
+                                                  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+                                            ✅ Confirmer mon compte
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 30px 0 0; font-size: 14px; line-height: 20px; color: #6b7280; text-align: center;">
+                                Ou copiez ce lien dans votre navigateur :
+                            </p>
+                            <p style="margin: 10px 0 0; font-size: 12px; line-height: 18px; color: #9ca3af; text-align: center; word-break: break-all;">
+                                <a href="{{ .ConfirmationURL }}" style="color: #10b981; text-decoration: none;">{{ .ConfirmationURL }}</a>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Section Avantages -->
+                    <tr>
+                        <td style="padding: 0 40px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 12px; padding: 20px;">
+                                <tr>
+                                    <td>
+                                        <h3 style="margin: 0 0 15px; font-size: 18px; font-weight: 600; color: #111827;">
+                                            Ce qui vous attend :
+                                        </h3>
+                                        <ul style="margin: 0; padding: 0 0 0 20px; color: #4b5563; font-size: 14px; line-height: 24px;">
+                                            <li style="margin-bottom: 8px;">💪 Coaching personnalisé en visio</li>
+                                            <li style="margin-bottom: 8px;">📅 Réservation de sessions en 1 clic</li>
+                                            <li style="margin-bottom: 8px;">📊 Suivi de votre progression</li>
+                                            <li style="margin-bottom: 8px;">🎯 Programmes adaptés à vos objectifs</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px; font-size: 12px; line-height: 18px; color: #9ca3af; text-align: center;">
+                                Ce lien de confirmation expire dans <strong>24 heures</strong>.
+                            </p>
+                            <p style="margin: 0; font-size: 12px; line-height: 18px; color: #9ca3af; text-align: center;">
+                                Si vous n'avez pas créé de compte Fitbuddy, ignorez cet email.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Contact -->
+                    <tr>
+                        <td style="padding: 0 40px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding: 20px 0 0; border-top: 1px solid #e5e7eb;">
+                                        <p style="margin: 0 0 10px; font-size: 14px; color: #6b7280; font-weight: 600;">
+                                            Des questions ?
+                                        </p>
+                                        <p style="margin: 0; font-size: 14px; color: #9ca3af;">
+                                            <a href="mailto:contact@fitbuddy.ch" style="color: #10b981; text-decoration: none;">contact@fitbuddy.ch</a>
+                                        </p>
+                                        <p style="margin: 10px 0 0; font-size: 12px; color: #9ca3af;">
+                                            <a href="https://fitbuddy.ch" style="color: #10b981; text-decoration: none;">fitbuddy.ch</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+                <!-- Legal Footer -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; margin-top: 20px;">
+                    <tr>
+                        <td align="center" style="padding: 20px;">
+                            <p style="margin: 0; font-size: 11px; line-height: 16px; color: #9ca3af; text-align: center;">
+                                © 2026 Fitbuddy. Tous droits réservés.<br>
+                                Coaching Sport & Santé en Visio
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
