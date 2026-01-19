@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
                 package_id: packageId,
                 session_type: 'coaching_followup' as const,
                 session_date: date.toISOString().split('T')[0],
-                session_time: date.toTimeString().split(' ')[0].substring(0, 5),
                 duration_minutes: 45,
                 status: 'scheduled' as const,
             };
@@ -70,8 +69,9 @@ export async function POST(request: NextRequest) {
 
         if (sessionError) {
             console.error('Error creating sessions:', sessionError);
+            console.error('Session data:', sessions);
             return NextResponse.json(
-                { error: 'Failed to create sessions' },
+                { error: `Failed to create sessions: ${sessionError.message || sessionError.code}` },
                 { status: 500 }
             );
         }

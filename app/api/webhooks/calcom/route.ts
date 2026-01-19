@@ -147,7 +147,6 @@ async function handleBookingCreated(booking: CalComBooking) {
         package_id: activePackage?.id || null,
         session_type: sessionType,
         session_date: start.toISOString().split('T')[0],
-        session_time: start.toTimeString().split(' ')[0].substring(0, 5),
         duration_minutes: durationMinutes,
         status: 'scheduled' as const,
         calcom_booking_id: booking.uid,
@@ -231,7 +230,6 @@ async function handleBookingRescheduled(booking: CalComBooking) {
         .from('sessions')
         .update({
             session_date: start.toISOString().split('T')[0],
-            session_time: start.toTimeString().split(' ')[0].substring(0, 5),
             duration_minutes: durationMinutes,
         })
         .eq('calcom_booking_id', booking.uid);
