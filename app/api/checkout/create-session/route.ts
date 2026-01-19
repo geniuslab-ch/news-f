@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
         // Create Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
-            mode: 'payment',
+            mode: 'subscription',
             payment_method_types: ['card'],
             line_items: [
                 {
@@ -38,11 +38,13 @@ export async function POST(request: NextRequest) {
             ],
             success_url: `${origin}/dashboard/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/dashboard/checkout/cancel`,
-            metadata: {
-                userId,
-                packageType,
-                sessions: product.sessions.toString(),
-                duration: product.duration.toString(),
+            subscription_data: {
+                metadata: {
+                    userId,
+                    packageType,
+                    sessions: product.sessions.toString(),
+                    duration: product.duration.toString(),
+                },
             },
             customer_email: undefined, // Will be filled by Stripe from user input
             allow_promotion_codes: true,

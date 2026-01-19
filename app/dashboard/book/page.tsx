@@ -13,7 +13,7 @@ export default function BookPage() {
     const [user, setUser] = useState<User | null>(null);
     const [activePackage, setActivePackage] = useState<Package | null>(null);
     const [loading, setLoading] = useState(true);
-    const [selectedType, setSelectedType] = useState<'discovery' | 'coaching' | 'coaching_followup'>('coaching');
+    const [selectedType, setSelectedType] = useState<'discovery' | 'coaching' | 'coaching_followup'>('coaching_followup');
 
     useEffect(() => {
         loadUser();
@@ -113,66 +113,28 @@ export default function BookPage() {
                         </div>
                     )}
 
-                    {/* Session Type Selection */}
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-primary-100 mb-6">
+                    {/* Type Selection */}
+                    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-4">Type de session</h2>
 
                         <div className="space-y-3">
-                            <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg border-2 transition ${selectedType === 'discovery'
-                                ? 'border-primary-500 bg-primary-50'
-                                : 'border-gray-200 hover:border-primary-300'
-                                }`}>
+                            {/* Coaching Followup Only */}
+                            <label className="flex items-start gap-3 p-4 border-2 border-primary-500 rounded-lg cursor-pointer bg-primary-50">
                                 <input
                                     type="radio"
-                                    name="sessionType"
-                                    checked={selectedType === 'discovery'}
-                                    onChange={() => setSelectedType('discovery')}
-                                    className="mt-1 w-5 h-5"
+                                    name="session-type"
+                                    value="coaching_followup"
+                                    checked={true}
+                                    readOnly
+                                    className="mt-1"
                                 />
-                                <div>
-                                    <span className="font-semibold text-gray-900">🎁 Appel découverte gratuit (15 min)</span>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        Découvrez nos programmes et posez vos questions sans engagement.
-                                    </p>
-                                </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg border-2 transition ${selectedType === 'coaching'
-                                ? 'border-primary-500 bg-primary-50'
-                                : 'border-gray-200 hover:border-primary-300'
-                                }`}>
-                                <input
-                                    type="radio"
-                                    name="sessionType"
-                                    checked={selectedType === 'coaching'}
-                                    onChange={() => setSelectedType('coaching')}
-                                    className="mt-1 w-5 h-5"
-                                />
-                                <div>
-                                    <span className="font-semibold text-gray-900">💪 Session de coaching (45 min)</span>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        Coaching personnalisé pour atteindre vos objectifs fitness.
-                                        {activePackage && <span className="block mt-1 text-primary-600 font-semibold">Cette session sera déduite de votre forfait.</span>}
-                                    </p>
-                                </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg border-2 transition ${selectedType === 'coaching_followup'
-                                ? 'border-primary-500 bg-primary-50'
-                                : 'border-gray-200 hover:border-primary-300'
-                                }`}>
-                                <input
-                                    type="radio"
-                                    name="sessionType"
-                                    checked={selectedType === 'coaching_followup'}
-                                    onChange={() => setSelectedType('coaching_followup')}
-                                    className="mt-1 w-5 h-5"
-                                />
-                                <div>
-                                    <span className="font-semibold text-gray-900">🔄 Coaching Suivi (45 min)</span>
-                                    <p className="text-xs text-gray-600 mt-1">
+                                <div className="flex-1">
+                                    <div className="font-bold text-gray-900 mb-1">🔄 Coaching Suivi (45 min)</div>
+                                    <p className="text-sm text-gray-600 mb-2">
                                         Session de suivi pour continuer votre progression.
-                                        {activePackage && <span className="block mt-1 text-primary-600 font-semibold">Cette session sera déduite de votre forfait.</span>}
+                                    </p>
+                                    <p className="text-sm font-bold text-primary-600">
+                                        Cette session sera déduite de votre forfait.
                                     </p>
                                 </div>
                             </label>
