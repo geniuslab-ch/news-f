@@ -73,16 +73,31 @@ export default function DashboardPage() {
     const handleCancel = async (sessionId: string) => {
         if (!user) return;
 
+        console.log('🔴 Cancel clicked for session:', sessionId);
+
         const confirmed = window.confirm('Êtes-vous sûr de vouloir annuler cette session ?');
+        console.log('✅ User confirmed:', confirmed);
+
         if (!confirmed) return;
 
         setCancellingId(sessionId);
 
         try {
-            await cancelSession(sessionId, user.id);
+            console.log('📡 Calling cancelSession API...');
+            const result = await cancelSession(sessionId, user.id);
+
+            console.log('📦 Cancel result:', result);
+
+            if (result.error) {
+                console.error('❌ Cancel error:', result.error);
+                alert(`Erreur: ${result.error.message || 'Impossible d\'annuler la session'}`);
+                return;
+            }
+
+            console.log('✅ Session cancelled successfully, refreshing dashboard...');
             await loadDashboard(); // Refresh dashboard
         } catch (error) {
-            console.error('Error cancelling session:', error);
+            console.error('💥 Exception during cancel:', error);
             alert('Erreur lors de l\'annulation. Veuillez réessayer.');
         } finally {
             setCancellingId(null);

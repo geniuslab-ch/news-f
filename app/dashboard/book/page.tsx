@@ -50,7 +50,7 @@ export default function BookPage() {
     const calLink = selectedType === 'discovery'
         ? `https://app.cal.eu/fitbuddy/15min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`
         : selectedType === 'coaching_followup'
-            ? `https://app.cal.eu/fitbuddy/suivi-45min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`
+            ? `https://app.cal.eu/fitbuddy/session-coaching-suivi-45-min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`
             : `https://app.cal.eu/fitbuddy/45min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`;
 
     if (loading) {
