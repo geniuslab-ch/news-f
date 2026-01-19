@@ -10,6 +10,7 @@ import type { User } from '@supabase/supabase-js';
 import type { Package, Session } from '@/lib/supabase-helpers';
 import PackageCard from '@/components/dashboard/PackageCard';
 import SessionCard from '@/components/dashboard/SessionCard';
+import ProgramSelector from '@/components/dashboard/ProgramSelector';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -163,9 +164,13 @@ export default function DashboardPage() {
                         Tableau de bord
                     </h1>
 
-                    {/* Package Card */}
+                    {/* Package Card or Program Selector */}
                     <div className="mb-8">
-                        <PackageCard package={activePackage} loading={loading} />
+                        {activePackage ? (
+                            <PackageCard package={activePackage} loading={loading} />
+                        ) : (
+                            <ProgramSelector />
+                        )}
                     </div>
 
                     {/* Next Session */}
