@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
             userId: string;
         };
 
+        console.log('🔍 Checkout request:', { priceId, packageType, userId });
+
         if (!priceId || !packageType || !userId) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
@@ -20,6 +22,9 @@ export async function POST(request: NextRequest) {
 
         const product = getProduct(packageType);
         const origin = request.headers.get('origin') || 'https://news-f-phi.vercel.app';
+
+        console.log('📦 Product:', product);
+        console.log('🔑 Creating Stripe session with priceId:', priceId);
 
         // Create Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
@@ -42,6 +47,8 @@ export async function POST(request: NextRequest) {
             customer_email: undefined, // Will be filled by Stripe from user input
             allow_promotion_codes: true,
         });
+
+        console.log('✅ Session created:', session.id);
 
         return NextResponse.json({
             sessionId: session.id,
