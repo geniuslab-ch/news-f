@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
                 package_id: packageId,
                 session_type: 'coaching_followup' as const,
                 session_date: date.toISOString().split('T')[0],
+                scheduled_time: date.toTimeString().split(' ')[0], // HH:MM:SS
                 duration_minutes: 45,
                 status: 'scheduled' as const,
             };

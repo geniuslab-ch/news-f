@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { getActivePackage, getNextSession, getUserSessions, cancelSession } from '@/lib/supabase-helpers';
 import type { User } from '@supabase/supabase-js';
@@ -120,8 +121,14 @@ export default function DashboardPage() {
             {/* Header */}
             <header className="bg-white shadow-sm border-b border-primary-100">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="text-2xl font-bold text-gradient">
-                        Fitbuddy
+                    <Link href="/" className="flex items-center gap-3">
+                        <Image
+                            src="/logo (1)FITBUDDY.png"
+                            alt="Fitbuddy"
+                            width={150}
+                            height={50}
+                            className="h-12 w-auto"
+                        />
                     </Link>
                     <div className="flex items-center gap-6">
                         <Link href="/dashboard" className="text-sm font-semibold text-primary-600">
@@ -129,6 +136,9 @@ export default function DashboardPage() {
                         </Link>
                         <Link href="/dashboard/sessions" className="text-sm font-medium text-gray-600 hover:text-gray-900">
                             Mes sessions
+                        </Link>
+                        <Link href="/dashboard/book/recurring" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                            📅 Sessions récurrentes
                         </Link>
                         <div className="flex items-center gap-4 border-l border-gray-300 pl-6">
                             <span className="text-gray-700">

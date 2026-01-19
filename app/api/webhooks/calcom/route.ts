@@ -147,6 +147,7 @@ async function handleBookingCreated(booking: CalComBooking) {
         package_id: activePackage?.id || null,
         session_type: sessionType,
         session_date: start.toISOString().split('T')[0],
+        scheduled_time: start.toTimeString().split(' ')[0], // HH:MM:SS
         duration_minutes: durationMinutes,
         status: 'scheduled' as const,
         calcom_booking_id: booking.uid,
@@ -170,12 +171,23 @@ async function handleBookingCreated(booking: CalComBooking) {
 
     // Increment sessions_used if package exists and not discovery
     if (activePackage && sessionType !== 'discovery') {
-        await supabaseAdmin
+        const { error: updateError } = await supabaseAdmin
             .from('packages')
-            .update({ sessions_used: (activePackage.sessions_used || 0) + 1 })
+            .update({
+                sessions_used: (activePackage.sessions_used || 0) + 1,
+                updated_at: new Date().toISOString()
+            })
             .eq('id', activePackage.id);
 
-        console.log('✅ Package sessions_used incremented');
+        if (updateError) {
+            console.error('❌ Error updating package sessions_used:', updateError);
+        } else {
+            console.log(`✅ Package sessions_used incremented: ${(activePackage.sessions_used || 0) + 1}/${activePackage.total_sessions}`);
+        }
+    } else if (!activePackage) {
+        console.warn('⚠️ No active package - sessions_used not incremented');
+    } else {
+        console.log('ℹ️ Discovery session - sessions_used not incremented');
     }
 }
 

@@ -23,9 +23,11 @@ export interface Session {
     coach_name?: string;
     session_type: 'discovery' | 'coaching' | 'coaching_followup';
     session_date: string;
+    scheduled_time?: string; // HH:MM:SS format
     duration_minutes: number;
     google_meet_link?: string;
     cal_com_booking_id?: string;
+    calcom_booking_id?: string;
     status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled' | 'no_show';
     notes?: string;
     created_at: string;

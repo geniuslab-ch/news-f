@@ -22,7 +22,7 @@ export default function SessionCard({ session, onCancel, cancelling }: SessionCa
                             {formatDate(session.session_date)}
                         </span>
                         <span className="text-sm text-gray-600">
-                            à {formatTime(session.session_date)}
+                            à {session.scheduled_time ? session.scheduled_time.substring(0, 5) : formatTime(session.session_date)}
                         </span>
                     </div>
 
