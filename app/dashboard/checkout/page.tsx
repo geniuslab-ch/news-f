@@ -1,21 +1,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import GlobalNav from '@/components/GlobalNav';
 import { supabase } from '@/lib/supabase';
 import { STRIPE_PRODUCTS, type PackageType } from '@/lib/stripe-config';
 import type { User } from '@supabase/supabase-js';
 
 export default function CheckoutPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [purchasing, setPurchasing] = useState<PackageType | null>(null);
+    const [selectedProgram, setSelectedProgram] = useState<string>('');
+    const [highlightedPackage, setHighlightedPackage] = useState<PackageType | null>(null);
 
     useEffect(() => {
         loadUser();
-    }, []);
+
+        // Pre-fill from URL params
+        const program = searchParams.get('program');
+        const duration = searchParams.get('duration');
+
+        if (program) {
+            setSelectedProgram(program);
+        }
+
+        if (duration) {
+            setHighlightedPackage(duration as PackageType);
+            // Smooth scroll to highlighted package after render
+            setTimeout(() => {
+                const element = document.getElementById(`package-${duration}`);
+                element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
+        }
+    }, [searchParams]);
 
     const loadUser = async () => {
         try {
@@ -93,25 +114,8 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-primary-100">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="text-2xl font-bold text-gradient">
-                        Fitbuddy
-                    </Link>
-                    <div className="flex items-center gap-6">
-                        <Link href="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                            Dashboard
-                        </Link>
-                        <button
-                            onClick={handleLogout}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
-                        >
-                            Déconnexion
-                        </button>
-                    </div>
-                </div>
-            </header>
+            {/* Global Navigation */}
+            <GlobalNav />
 
             {/* Main Content */}
             <main className="container mx-auto px-4 py-10">
@@ -136,9 +140,12 @@ export default function CheckoutPage() {
                         {products.map((product) => (
                             <div
                                 key={product.type}
-                                className={`relative bg-white rounded-2xl p-6 shadow-xl border-2 transition-all hover:scale-105 ${product.recommended
-                                        ? 'border-primary-500 ring-4 ring-primary-100'
-                                        : 'border-gray-200 hover:border-primary-300'
+                                id={`package-${product.type}`}
+                                className={`relative bg-white rounded-2xl p-6 shadow-xl border-2 transition-all hover:scale-105 ${highlightedPackage === product.type
+                                        ? 'border-primary-500 ring-4 ring-primary-100 bg-primary-50'
+                                        : product.recommended
+                                            ? 'border-primary-500 ring-4 ring-primary-100'
+                                            : 'border-gray-200 hover:border-primary-300'
                                     }`}
                             >
                                 {/* Badge */}
@@ -185,8 +192,8 @@ export default function CheckoutPage() {
                                     onClick={() => handlePurchase(product.type)}
                                     disabled={purchasing === product.type}
                                     className={`w-full font-bold py-3 px-6 rounded-lg transition-all ${product.recommended
-                                            ? 'bg-gradient-fitbuddy text-white hover:scale-105 shadow-lg'
-                                            : 'bg-gray-900 text-white hover:bg-gray-800'
+                                        ? 'bg-gradient-fitbuddy text-white hover:scale-105 shadow-lg'
+                                        : 'bg-gray-900 text-white hover:bg-gray-800'
                                         } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     {purchasing === product.type ? 'Chargement...' : 'Acheter maintenant'}
