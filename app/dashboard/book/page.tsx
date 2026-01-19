@@ -104,12 +104,30 @@ export default function BookPage() {
                         Choisissez le type de rendez-vous et planifiez votre session.
                     </p>
 
-                    {/* Package Info */}
-                    {activePackage && (
+                    {/* Package Info or Warning */}
+                    {activePackage ? (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
                             <p className="text-sm text-green-800">
                                 ✅ Vous avez <span className="font-bold">{activePackage.sessions_remaining} sessions restantes</span> dans votre forfait.
                             </p>
+                        </div>
+                    ) : (
+                        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6 mb-8">
+                            <div className="flex items-start gap-3">
+                                <span className="text-3xl">⚠️</span>
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-gray-900 text-lg mb-2">Aucun forfait actif</h3>
+                                    <p className="text-gray-700 mb-4">
+                                        Pour réserver une session de coaching, vous devez d'abord acheter un forfait.
+                                    </p>
+                                    <Link
+                                        href="/dashboard/checkout"
+                                        className="inline-block bg-gradient-fitbuddy text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition shadow-lg"
+                                    >
+                                        💳 Acheter un forfait maintenant →
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -150,14 +168,22 @@ export default function BookPage() {
                             Vous allez être redirigé vers Cal.com pour choisir votre créneau horaire.
                         </p>
 
-                        <a
-                            href={calLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block bg-gradient-fitbuddy text-white font-bold text-lg px-10 py-4 rounded-full hover:scale-110 transition-all duration-300 shadow-2xl btn-shine"
-                        >
-                            📅 Ouvrir le calendrier →
-                        </a>
+                        {activePackage ? (
+                            <a
+                                href={calLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block bg-gradient-fitbuddy text-white font-bold text-lg px-10 py-4 rounded-full hover:scale-110 transition-all duration-300 shadow-2xl btn-shine"
+                            >
+                                📅 Ouvrir le calendrier →
+                            </a>
+                        ) : (
+                            <div className="opacity-50 cursor-not-allowed">
+                                <div className="inline-block bg-gray-400 text-white font-bold text-lg px-10 py-4 rounded-full">
+                                    🔒 Achetez un forfait pour réserver
+                                </div>
+                            </div>
+                        )}
 
                         <p className="text-xs text-gray-600 mt-4">
                             Un nouvel onglet s'ouvrira avec le calendrier de réservation.
