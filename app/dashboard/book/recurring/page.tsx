@@ -257,11 +257,14 @@ export default function RecurringBookingPage() {
 
                     {/* Preview */}
                     <div className="bg-primary-50 border-2 border-primary-200 rounded-lg p-6 mb-6">
-                        <h3 className="font-bold text-gray-900 mb-4">📝 Aperçu des sessions</h3>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-gray-900">📝 Aperçu des sessions</h3>
+                            <span className="text-sm text-gray-600">{previewDates.length} session{previewDates.length > 1 ? 's' : ''}</span>
+                        </div>
+                        <div className="space-y-2 max-h-96 overflow-y-auto border border-primary-100 rounded-lg p-2">
                             {previewDates.map((date, idx) => (
-                                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                                    <span className="text-green-500 font-bold">✓</span>
+                                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
+                                    <span className="text-green-500 font-bold text-lg">✓</span>
                                     <span className="text-gray-900">
                                         {dayNames[date.getDay()]} {date.getDate()} {monthNames[date.getMonth()]} {date.getFullYear()} à {date.toTimeString().substring(0, 5)}
                                     </span>
