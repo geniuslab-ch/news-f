@@ -17,7 +17,7 @@ export interface StripeProduct {
 
 export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
     '1month': {
-        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_1MONTH || 'price_1month_placeholder',
+        priceId: (process.env.NEXT_PUBLIC_STRIPE_PRICE_1MONTH || 'price_1month_placeholder').trim(),
         name: 'Formule 1 mois',
         price: 200,
         sessions: 8,
@@ -31,7 +31,7 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
         ],
     },
     '3months': {
-        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_3MONTHS || 'price_3months_placeholder',
+        priceId: (process.env.NEXT_PUBLIC_STRIPE_PRICE_3MONTHS || 'price_3months_placeholder').trim(),
         name: 'Formule 3 mois',
         price: 555,
         sessions: 24,
@@ -48,7 +48,7 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
         badge: 'Populaire',
     },
     '6months': {
-        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_6MONTHS || 'price_6months_placeholder',
+        priceId: (process.env.NEXT_PUBLIC_STRIPE_PRICE_6MONTHS || 'price_6months_placeholder').trim(),
         name: 'Formule 6 mois',
         price: 1050,
         sessions: 48,
@@ -65,7 +65,7 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
         badge: 'Meilleure valeur',
     },
     '12months': {
-        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_12MONTHS || 'price_12months_placeholder',
+        priceId: (process.env.NEXT_PUBLIC_STRIPE_PRICE_12MONTHS || 'price_12months_placeholder').trim(),
         name: 'Formule 12 mois',
         price: 1980,
         sessions: 98,
