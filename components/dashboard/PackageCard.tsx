@@ -17,25 +17,7 @@ export default function PackageCard({ package: pkg, loading }: PackageCardProps)
     }
 
     if (!pkg) {
-        return (
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-primary-100">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                        <span className="text-2xl">📦</span>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900">Aucun forfait actif</h3>
-                </div>
-                <p className="text-gray-600 mb-4">
-                    Vous n'avez pas encore de forfait actif. Choisissez un forfait pour commencer votre transformation !
-                </p>
-                <a
-                    href="/#pricing"
-                    className="inline-block bg-gradient-fitbuddy text-white font-semibold px-6 py-3 rounded-lg hover:scale-105 transition-all"
-                >
-                    Choisir un forfait →
-                </a>
-            </div>
-        );
+        return null; // Dashboard shows ProgramSelector instead
     }
 
     const details = getPackageDetails(pkg.package_type);

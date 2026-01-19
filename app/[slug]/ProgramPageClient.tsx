@@ -13,7 +13,7 @@ import PricingSection from '@/components/PricingSection';
 import Testimonials from '@/components/Testimonials';
 import TikTokFeed from '@/components/TikTokFeed';
 import FAQ from '@/components/FAQ';
-import SignupForm from '@/components/SignupForm';
+import SimplifiedCTA from '@/components/SimplifiedCTA';
 import type { ProgramConfig } from '@/lib/programsConfig';
 
 export default function ProgramPageClient({ program }: { program: ProgramConfig }) {
@@ -53,41 +53,12 @@ export default function ProgramPageClient({ program }: { program: ProgramConfig 
 
             <FAQ faqItems={program.faq[lang]} lang={lang} />
 
-            {/* CTA + Signup Section */}
-            <section id="signup" className="py-20 bg-gradient-fitbuddy">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-3xl mx-auto">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                                {lang === 'fr'
-                                    ? 'Prêt à transformer votre vie ?'
-                                    : 'Ready to Transform Your Life?'}
-                            </h2>
-                            <p className="text-lg text-white/90">
-                                {lang === 'fr'
-                                    ? 'Remplissez le formulaire ci-dessous et commencez votre parcours dès aujourd\'hui.'
-                                    : 'Fill out the form below and start your journey today.'}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-8 md:p-10 shadow-2xl">
-                            <SignupForm
-                                programSlug={program.slug}
-                                programTitle={program.title}
-                                goalOptions={program.goalOptions}
-                                ctaText={program.cta}
-                                lang={lang}
-                            />
-                        </div>
-
-                        <p className="text-center text-white/90 text-sm mt-8">
-                            {lang === 'fr'
-                                ? '⚠️ Important : Les programmes Fitbuddy ne remplacent pas un avis médical. Consultez votre médecin avant de commencer.'
-                                : '⚠️ Important: Fitbuddy programs do not replace medical advice. Consult your doctor before starting.'}
-                        </p>
-                    </div>
-                </div>
-            </section>
+            {/* Simplified CTA */}
+            <SimplifiedCTA
+                lang={lang}
+                programSlug={program.slug}
+                programTitle={program.title}
+            />
 
             <Footer />
         </div>
