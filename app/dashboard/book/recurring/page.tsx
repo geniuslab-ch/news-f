@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { getUserPackages, type Package } from '@/lib/supabase-helpers';
+import type { Package } from '@/lib/supabase-helpers';
 import type { User } from '@supabase/supabase-js';
 
 type Frequency = 'weekly' | 'biweekly' | 'monthly';
@@ -44,9 +44,16 @@ export default function RecurringBookingPage() {
 
             setUser(user);
 
-            const { data: packages } = await getUserPackages(user.id);
-            const active = packages?.find(p => p.status === 'active');
-            setActivePackage(active || null);
+            // Get active package
+            const { data: packages } = await supabase
+                .from('packages')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .order('created_at', { ascending: false });
+
+            const active = packages?.[0] || null;
+            setActivePackage(active);
 
         } catch (error) {
             console.error('Error loading user:', error);
