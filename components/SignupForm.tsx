@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { assignCoach } from '@/lib/coachAssignment';
 
 interface SignupFormProps {
@@ -129,17 +130,17 @@ export default function SignupForm({
                             </p>
                         )}
                         <a
-                            href={`${calLink}?name=${encodeURIComponent(formData.firstName)}&email=${encodeURIComponent(formData.email)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href="/signup"
+                            
+                            
                             className="inline-block bg-gradient-fitbuddy text-white font-bold text-lg px-10 py-5 rounded-full hover:scale-110 transition-all duration-300 shadow-2xl btn-shine animate-pulse"
                         >
-                            {t.bookButton} →
+                            {lang === 'fr' ? 'Créer mon compte →' : 'Create Account →'}
                         </a>
                         <p className="text-xs text-gray-500 mt-4">
                             {lang === 'fr'
-                                ? 'Un nouvel onglet s\'ouvrira avec le calendrier'
-                                : 'A new tab will open with the calendar'}
+                                ? 'Créez votre compte pour continuer'
+                                : 'Create your account to continue'}
                         </p>
                     </div>
                 )}
