@@ -19,7 +19,7 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
     '1month': {
         priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_1MONTH || 'price_1month_placeholder',
         name: 'Formule 1 mois',
-        price: 333,
+        price: 200,
         sessions: 8,
         duration: 30,
         description: '2 sessions par semaine pour démarrer',
@@ -50,7 +50,7 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
     '6months': {
         priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_6MONTHS || 'price_6months_placeholder',
         name: 'Formule 6 mois',
-        price: 888,
+        price: 1050,
         sessions: 48,
         duration: 180,
         description: 'Transformation durable garantie',
@@ -67,7 +67,7 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
     '12months': {
         priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_12MONTHS || 'price_12months_placeholder',
         name: 'Formule 12 mois',
-        price: 1776,
+        price: 1980,
         sessions: 98,
         duration: 365,
         description: 'Engagement annuel pour résultats exceptionnels',
