@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import GlobalNav from '@/components/GlobalNav';
@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { STRIPE_PRODUCTS, type PackageType } from '@/lib/stripe-config';
 import type { User } from '@supabase/supabase-js';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [user, setUser] = useState<User | null>(null);
@@ -94,11 +94,6 @@ export default function CheckoutPage() {
         }
     };
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.push('/login');
-    };
-
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center">
@@ -133,6 +128,11 @@ export default function CheckoutPage() {
                         <p className="text-lg text-gray-600">
                             Commencez votre transformation avec un programme adapté à vos objectifs
                         </p>
+                        {selectedProgram && (
+                            <div className="mt-4 inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium">
+                                Programme : <span className="font-bold capitalize">{selectedProgram.replace('-', ' ')}</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Pricing Cards */}
@@ -214,5 +214,17 @@ export default function CheckoutPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function CheckoutPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-600"></div>
+            </div>
+        }>
+            <CheckoutContent />
+        </Suspense>
     );
 }
