@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const sessionsRemaining = pkg.total_sessions - (pkg.sessions_used || 0);
+        const sessionsRemaining = pkg.sessions_remaining || 0;
 
         if (dates.length > sessionsRemaining) {
             return NextResponse.json(
@@ -77,10 +77,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Update package sessions_used
+        // Update package: increment sessions_used AND decrement sessions_remaining
         const { error: updateError } = await supabaseAdmin
             .from('packages')
-            .update({ sessions_used: (pkg.sessions_used || 0) + dates.length })
+            .update({
+                sessions_used: (pkg.sessions_used || 0) + dates.length,
+                sessions_remaining: Math.max(0, (pkg.sessions_remaining || 0) - dates.length)
+            })
             .eq('id', packageId);
 
         if (updateError) {
