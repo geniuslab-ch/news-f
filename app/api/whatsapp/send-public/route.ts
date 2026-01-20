@@ -45,23 +45,8 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Twilio message sent:', twilioMessage.sid);
 
-        // Get first available coach for assignment
-        const { data: coaches } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('role', 'coach')
-            .limit(1);
-
-        const coachId = coaches?.[0]?.id;
-
-        if (!coachId) {
-            console.error('⚠️ No coaches found - message sent but no conversation created');
-            return NextResponse.json({
-                success: true,
-                messageSid: twilioMessage.sid,
-                warning: 'Message sent but no coach available for assignment',
-            });
-        }
+        // Hardcoded coach ID (for now - bypass RLS read issues)
+        const coachId = 'ef8367ed-2509-4611-81bc-d0b5c3e29895';
 
         // Find or create conversation
         let conversation;
