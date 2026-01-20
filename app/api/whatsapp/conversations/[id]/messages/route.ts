@@ -9,10 +9,10 @@ import { createClient } from '@supabase/supabase-js';
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const conversationId = params.id;
+        const { id: conversationId } = await params;
 
         // Get authenticated user
         const authHeader = request.headers.get('authorization');
