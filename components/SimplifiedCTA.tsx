@@ -10,7 +10,7 @@ interface SimplifiedCTAProps {
 
 export default function SimplifiedCTA({ lang, programSlug, programTitle }: SimplifiedCTAProps) {
     return (
-        <section className="py-20 bg-gradient-fitbuddy">
+        <section id="signup" className="py-20 bg-gradient-fitbuddy">
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Discovery Session */}

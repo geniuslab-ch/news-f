@@ -57,7 +57,7 @@ export default function TikTokFeed({ lang }: TikTokFeedProps) {
                 {/* CTA to follow */}
                 <div className="text-center mt-8">
                     <a
-                        href="https://tiktok.com/@fitbuddy"
+                        href="https://www.tiktok.com/@thu_coaching?_t=8sXBHuP2dSE&_r=1"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-block bg-gradient-fitbuddy text-white font-bold px-8 py-3 rounded-full hover:scale-105 transition-all shadow-lg"
