@@ -16,7 +16,6 @@ export default function PricingSection({ lang }: PricingSectionProps) {
             title: 'Choisissez votre forfait',
             subtitle: '8× moins cher qu\'un coach présentiel, mêmes résultats !',
             perMonth: '/mois',
-            select: 'SÉLECTIONNER',
             features: {
                 sessions: 'Sessions personnalisées 1:1',
                 plan: 'Plan d\'entraînement sur mesure',
@@ -24,13 +23,13 @@ export default function PricingSection({ lang }: PricingSectionProps) {
                 scheduling: 'Planification flexible'
             },
             bestValue: 'Meilleure valeur',
-            popular: 'Le plus populaire'
+            popular: 'Le plus populaire',
+            info: 'Créez un compte pour sélectionner votre forfait'
         },
         en: {
             title: 'Choose Your Plan',
             subtitle: '8× cheaper than in-person coaching, same results!',
             perMonth: '/month',
-            select: 'SELECT',
             features: {
                 sessions: 'Personalized 1:1 Sessions',
                 plan: 'Custom Workout Plan',
@@ -38,7 +37,8 @@ export default function PricingSection({ lang }: PricingSectionProps) {
                 scheduling: 'Flexible Scheduling'
             },
             bestValue: 'Best Value',
-            popular: 'Most Popular'
+            popular: 'Most Popular',
+            info: 'Create an account to select your package'
         }
     };
 
@@ -90,8 +90,8 @@ export default function PricingSection({ lang }: PricingSectionProps) {
                         <div
                             key={index}
                             className={`relative rounded-3xl p-8 transition-all duration-300 ${tier.featured
-                                    ? 'bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-2xl scale-105 border-4 border-primary-300'
-                                    : 'bg-white text-gray-900 shadow-lg hover:shadow-xl border-2 border-gray-200'
+                                ? 'bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-2xl scale-105 border-4 border-primary-300'
+                                : 'bg-white text-gray-900 shadow-lg hover:shadow-xl border-2 border-gray-200'
                                 }`}
                         >
                             {/* Badge */}
@@ -145,16 +145,10 @@ export default function PricingSection({ lang }: PricingSectionProps) {
                                 </li>
                             </ul>
 
-                            {/* CTA Button */}
-                            <a
-                                href="#signup"
-                                className={`block w-full text-center font-bold py-4 px-6 rounded-xl transition-all duration-300 ${tier.featured
-                                        ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 shadow-lg hover:shadow-xl'
-                                        : 'bg-gradient-fitbuddy text-white hover:scale-105 shadow-md'
-                                    }`}
-                            >
-                                {t.select} ≫
-                            </a>
+                            {/* Info Text */}
+                            <div className="text-center py-3 text-sm font-medium opacity-75">
+                                {t.info}
+                            </div>
                         </div>
                     ))}
                 </div>

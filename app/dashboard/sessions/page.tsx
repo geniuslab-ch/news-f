@@ -45,16 +45,31 @@ export default function SessionsPage() {
     const handleCancel = async (sessionId: string) => {
         if (!user) return;
 
+        console.log('🔴 Cancel clicked for session:', sessionId);
+
         const confirmed = window.confirm('Êtes-vous sûr de vouloir annuler cette session ?');
+        console.log('✅ User confirmed:', confirmed);
+
         if (!confirmed) return;
 
         setCancellingId(sessionId);
 
         try {
-            await cancelSession(sessionId, user.id);
+            console.log('📡 Calling cancelSession API...');
+            const result = await cancelSession(sessionId, user.id);
+
+            console.log('📦 Cancel result:', result);
+
+            if (result.error) {
+                console.error('❌ Cancel error:', result.error);
+                alert(`Erreur: ${result.error.message || 'Impossible d\'annuler la session'}`);
+                return;
+            }
+
+            console.log('✅ Session cancelled successfully, refreshing sessions...');
             await loadSessions(); // Refresh list
         } catch (error) {
-            console.error('Error cancelling session:', error);
+            console.error('💥 Exception during cancel:', error);
             alert('Erreur lors de l\'annulation. Veuillez réessayer.');
         } finally {
             setCancellingId(null);
@@ -117,8 +132,8 @@ export default function SessionsPage() {
                         <button
                             onClick={() => setFilter('all')}
                             className={`px-4 py-2 rounded-lg font-semibold transition ${filter === 'all'
-                                    ? 'bg-gradient-fitbuddy text-white'
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
+                                ? 'bg-gradient-fitbuddy text-white'
+                                : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
                                 }`}
                         >
                             Toutes ({sessions.length})
@@ -126,8 +141,8 @@ export default function SessionsPage() {
                         <button
                             onClick={() => setFilter('upcoming')}
                             className={`px-4 py-2 rounded-lg font-semibold transition ${filter === 'upcoming'
-                                    ? 'bg-gradient-fitbuddy text-white'
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
+                                ? 'bg-gradient-fitbuddy text-white'
+                                : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
                                 }`}
                         >
                             À venir ({upcomingSessions.length})
@@ -135,8 +150,8 @@ export default function SessionsPage() {
                         <button
                             onClick={() => setFilter('past')}
                             className={`px-4 py-2 rounded-lg font-semibold transition ${filter === 'past'
-                                    ? 'bg-gradient-fitbuddy text-white'
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
+                                ? 'bg-gradient-fitbuddy text-white'
+                                : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
                                 }`}
                         >
                             Passées ({pastSessions.length})
