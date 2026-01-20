@@ -106,7 +106,7 @@ export default function RecurringBookingPage() {
     const handleCreate = async () => {
         if (!user || !activePackage) return;
 
-        const sessionsRemaining = activePackage.total_sessions - (activePackage.sessions_used || 0);
+        const sessionsRemaining = activePackage.sessions_remaining || 0;
 
         if (sessionCount > sessionsRemaining) {
             alert(`Vous avez seulement ${sessionsRemaining} session(s) disponible(s).`);
@@ -171,7 +171,7 @@ export default function RecurringBookingPage() {
         );
     }
 
-    const sessionsRemaining = activePackage.total_sessions - (activePackage.sessions_used || 0);
+    const sessionsRemaining = activePackage.sessions_remaining || 0;
     const sessionsAfterCreation = sessionsRemaining - sessionCount;
 
     return (
@@ -277,12 +277,12 @@ export default function RecurringBookingPage() {
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
                         <div className="flex justify-between text-sm mb-2">
                             <span className="text-gray-600">Sessions disponibles :</span>
-                            <span className="font-bold text-gray-900">{sessionsRemaining}/{activePackage.total_sessions}</span>
+                            <span className="font-bold text-gray-900">{sessionsRemaining}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Après création :</span>
                             <span className={`font-bold ${sessionsAfterCreation < 0 ? 'text-red-600' : 'text-primary-600'}`}>
-                                {sessionsAfterCreation}/{activePackage.total_sessions}
+                                {sessionsAfterCreation}
                             </span>
                         </div>
                     </div>
