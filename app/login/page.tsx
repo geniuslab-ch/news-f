@@ -26,8 +26,19 @@ export default function LoginPage() {
             if (error) throw error;
 
             if (data.user) {
-                // Redirect to dashboard
-                router.push('/dashboard');
+                // Get user profile to check role
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                // Redirect based on role
+                if (profile?.role === 'coach') {
+                    router.push('/dashboard-coach/messages');
+                } else {
+                    router.push('/dashboard');
+                }
                 router.refresh();
             }
         } catch (error: any) {
