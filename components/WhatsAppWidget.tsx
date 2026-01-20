@@ -5,11 +5,8 @@ import { useState } from 'react';
 export default function WhatsAppWidget() {
     const [isHovered, setIsHovered] = useState(false);
 
-    // ⚠️ TODO: Replace with your Fitbuddy WhatsApp Business number
-    // Format: country code + number (no + sign, no spaces, dashes, or special chars)
-    // Example: '41791234567' for Swiss number +41 79 123 45 67
-    const whatsappNumber = '41765928806'; // ← UPDATE THIS
-
+    // Fitbuddy WhatsApp Business number
+    const whatsappNumber = '41765928806';
     const message = encodeURIComponent('Bonjour! J\'aimerais en savoir plus sur Fitbuddy.');
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
