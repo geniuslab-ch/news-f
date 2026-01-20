@@ -176,8 +176,7 @@ async function handleBookingCreated(booking: CalComBooking) {
             .from('packages')
             .update({
                 sessions_used: (activePackage.sessions_used || 0) + 1,
-                sessions_remaining: Math.max(0, (activePackage.sessions_remaining || 0) - 1),
-                updated_at: new Date().toISOString()
+                sessions_remaining: Math.max(0, (activePackage.sessions_remaining || 0) - 1)
             })
             .eq('id', activePackage.id);
 
