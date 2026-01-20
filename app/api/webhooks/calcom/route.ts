@@ -169,26 +169,31 @@ async function handleBookingCreated(booking: CalComBooking) {
 
     console.log('✅ Session created successfully:', newSession.id);
 
-    // Increment sessions_used if package exists and not discovery
+
+    // Update package: increment sessions_used AND decrement sessions_remaining
     if (activePackage && sessionType !== 'discovery') {
         const { error: updateError } = await supabaseAdmin
             .from('packages')
             .update({
                 sessions_used: (activePackage.sessions_used || 0) + 1,
+                sessions_remaining: Math.max(0, (activePackage.sessions_remaining || 0) - 1),
                 updated_at: new Date().toISOString()
             })
             .eq('id', activePackage.id);
 
         if (updateError) {
-            console.error('❌ Error updating package sessions_used:', updateError);
+            console.error('❌ Error updating package:', updateError);
         } else {
-            console.log(`✅ Package sessions_used incremented: ${(activePackage.sessions_used || 0) + 1}/${activePackage.total_sessions}`);
+            const newRemaining = Math.max(0, (activePackage.sessions_remaining || 0) - 1);
+            const newUsed = (activePackage.sessions_used || 0) + 1;
+            console.log(`✅ Package updated: ${newUsed} used, ${newRemaining} remaining`);
         }
     } else if (!activePackage) {
-        console.warn('⚠️ No active package - sessions_used not incremented');
+        console.warn('⚠️ No active package - sessions not updated');
     } else {
-        console.log('ℹ️ Discovery session - sessions_used not incremented');
+        console.log('ℹ️ Discovery session - sessions not updated');
     }
+
 }
 
 async function handleBookingCancelled(booking: CalComBooking) {
@@ -212,21 +217,24 @@ async function handleBookingCancelled(booking: CalComBooking) {
 
     console.log('✅ Session cancelled');
 
-    // Decrement sessions_used if applicable
+    // Decrement sessions_used AND increment sessions_remaining
     if (session.package_id && session.session_type !== 'discovery') {
         const { data: pkg } = await supabaseAdmin
             .from('packages')
-            .select('sessions_used')
+            .select('sessions_used, sessions_remaining')
             .eq('id', session.package_id)
             .single();
 
         if (pkg && pkg.sessions_used > 0) {
             await supabaseAdmin
                 .from('packages')
-                .update({ sessions_used: pkg.sessions_used - 1 })
+                .update({
+                    sessions_used: pkg.sessions_used - 1,
+                    sessions_remaining: (pkg.sessions_remaining || 0) + 1
+                })
                 .eq('id', session.package_id);
 
-            console.log('✅ Package sessions_used decremented');
+            console.log('✅ Package updated: sessions restored');
         }
     }
 }
