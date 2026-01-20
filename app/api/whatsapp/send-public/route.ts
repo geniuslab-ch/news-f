@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Use SERVICE ROLE key to bypass RLS for public widget
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    }
+);
 
 const twilioClient = twilio(
     process.env.TWILIO_ACCOUNT_SID,
