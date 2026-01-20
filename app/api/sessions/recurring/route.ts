@@ -78,17 +78,35 @@ export async function POST(request: NextRequest) {
         }
 
         // Update package: increment sessions_used AND decrement sessions_remaining
-        const { error: updateError } = await supabaseAdmin
+        console.log('📦 Before update - Package state:', {
+            id: packageId,
+            sessions_used: pkg.sessions_used,
+            sessions_remaining: pkg.sessions_remaining,
+            dates_length: dates.length
+        });
+
+        const newSessionsUsed = (pkg.sessions_used || 0) + dates.length;
+        const newSessionsRemaining = Math.max(0, (pkg.sessions_remaining || 0) - dates.length);
+
+        console.log('📦 Attempting update with:', {
+            newSessionsUsed,
+            newSessionsRemaining
+        });
+
+        const { data: updatedPackage, error: updateError } = await supabaseAdmin
             .from('packages')
             .update({
-                sessions_used: (pkg.sessions_used || 0) + dates.length,
-                sessions_remaining: Math.max(0, (pkg.sessions_remaining || 0) - dates.length)
+                sessions_used: newSessionsUsed,
+                sessions_remaining: newSessionsRemaining
             })
-            .eq('id', packageId);
+            .eq('id', packageId)
+            .select();
 
         if (updateError) {
-            console.error('Error updating package:', updateError);
-            // Continue even if this fails
+            console.error('❌ Error updating package:', updateError);
+            console.error('Update details:', { packageId, newSessionsUsed, newSessionsRemaining });
+        } else {
+            console.log('✅ Package updated successfully:', updatedPackage);
         }
 
         console.log(`✅ Created ${createdSessions.length} recurring sessions`);
