@@ -59,7 +59,7 @@ export default function ClientsPage() {
         await loadClients();
     };
 
-    const load Clients = async () => {
+    const loadClients = async () => {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
