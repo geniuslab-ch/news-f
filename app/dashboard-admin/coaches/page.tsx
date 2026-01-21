@@ -17,6 +17,14 @@ export default function CoachesPage() {
     const router = useRouter();
     const [coaches, setCoaches] = useState<Coach[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+    });
+    const [creating, setCreating] = useState(false);
 
     useEffect(() => {
         loadCoaches();
@@ -35,6 +43,45 @@ export default function CoachesPage() {
             console.error('Error loading coaches:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAddCoach = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreating(true);
+
+        try {
+            // Create auth user
+            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+                email: formData.email,
+                password: formData.password,
+                email_confirm: true,
+            });
+
+            if (authError) throw authError;
+
+            // Update profile to coach role
+            if (authData.user) {
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update({
+                        role: 'coach',
+                        first_name: formData.first_name,
+                        last_name: formData.last_name,
+                    })
+                    .eq('id', authData.user.id);
+
+                if (profileError) throw profileError;
+            }
+
+            alert('Coach créé avec succès !');
+            setShowAddModal(false);
+            setFormData({ email: '', password: '', first_name: '', last_name: '' });
+            await loadCoaches();
+        } catch (error: any) {
+            alert('Erreur: ' + (error.message || 'Impossible de créer le coach'));
+        } finally {
+            setCreating(false);
         }
     };
 
@@ -70,12 +117,26 @@ export default function CoachesPage() {
                         <Link href="/dashboard-admin/sessions" className="py-3 px-2 border-b-2 border-transparent text-gray-600 hover:text-gray-900 whitespace-nowrap">
                             Toutes les Sessions
                         </Link>
+                        <Link href="/dashboard-coach/messages" className="py-3 px-2 border-b-2 border-transparent text-gray-600 hover:text-gray-900 whitespace-nowrap">
+                            Messages WhatsApp
+                        </Link>
                     </div>
                 </nav>
             </header>
 
             <main className="p-6 max-w-7xl mx-auto">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Gestion des Coaches</h2>
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Gestion des Coaches</h2>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Ajouter un Coach
+                    </button>
+                </div>
 
                 {loading ? (
                     <div className="text-center py-12">
@@ -108,6 +169,76 @@ export default function CoachesPage() {
                     </div>
                 )}
             </main>
+
+            {/* Add Coach Modal */}
+            {showAddModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Ajouter un Coach</h3>
+                        <form onSubmit={handleAddCoach} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.first_name}
+                                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.last_name}
+                                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                                <input
+                                    type="password"
+                                    required
+                                    minLength={6}
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
+                            </div>
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddModal(false)}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    disabled={creating}
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                                    disabled={creating}
+                                >
+                                    {creating ? 'Création...' : 'Créer'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
