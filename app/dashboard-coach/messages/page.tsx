@@ -28,6 +28,7 @@ interface Message {
 export default function CoachMessagesPage() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -79,6 +80,7 @@ export default function CoachMessagesPage() {
         }
 
         setUser(user);
+        setUserRole(profile?.role || null);
     };
 
     const loadConversations = async () => {
@@ -193,8 +195,10 @@ export default function CoachMessagesPage() {
             <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard-coach">
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition">Fitbuddy Coach</h1>
+                        <Link href={userRole === 'admin' ? '/dashboard-admin' : '/dashboard-coach'}>
+                            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition">
+                                {userRole === 'admin' ? 'Fitbuddy Admin' : 'Fitbuddy Coach'}
+                            </h1>
                         </Link>
                         <span className="text-gray-400">|</span>
                         <h1 className="text-lg font-semibold text-gray-900">Messages WhatsApp</h1>

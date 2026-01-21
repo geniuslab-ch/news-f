@@ -89,6 +89,41 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Message stored:', message.id);
 
+        // Send email notification to coach
+        try {
+            // Get coach email from the conversation
+            const { data: coachProfile } = await supabase
+                .from('profiles')
+                .select('email, first_name, last_name')
+                .eq('id', conversation.coach_id)
+                .single();
+
+            if (coachProfile?.email) {
+                const { sendWhatsAppNotification } = await import('@/lib/email');
+
+                // Get client name from phone lookup if available
+                const { data: clientProfile } = await supabase
+                    .from('profiles')
+                    .select('first_name, last_name')
+                    .eq('phone', fromPhone)
+                    .maybeSingle();
+
+                const clientName = clientProfile
+                    ? `${clientProfile.first_name} ${clientProfile.last_name}`
+                    : null;
+
+                await sendWhatsAppNotification({
+                    coachEmail: coachProfile.email,
+                    clientName: clientName || fromPhone,
+                    clientPhone: fromPhone,
+                    messagePreview: Body?.substring(0, 100) || '',
+                });
+            }
+        } catch (emailError) {
+            // Don't fail the webhook if email fails - message is already saved
+            console.error('⚠️ Failed to send email notification:', emailError);
+        }
+
         // Return TwiML response (Twilio expects XML)
         const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response></Response>`;
