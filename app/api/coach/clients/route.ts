@@ -31,6 +31,18 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        // First, get all client IDs who have sessions with this coach
+        const { data: sessionData } = await supabase
+            .from('sessions')
+            .select('user_id')
+            .eq('coach_id', user.id);
+
+        if (!sessionData || sessionData.length === 0) {
+            return NextResponse.json({ clients: [] });
+        }
+
+        const clientIds = [...new Set(sessionData.map(s => s.user_id))];
+
         // Get all clients who have sessions with this coach
         const { data: clients, error: clientsError } = await supabase
             .from('profiles')
@@ -41,7 +53,7 @@ export async function GET(request: NextRequest) {
                 last_name,
                 phone,
                 created_at,
-                packages!inner (
+                packages (
                     id,
                     package_type,
                     sessions_remaining,
@@ -50,12 +62,7 @@ export async function GET(request: NextRequest) {
                 )
             `)
             .eq('role', 'client')
-            .in('id',
-                supabase
-                    .from('sessions')
-                    .select('user_id')
-                    .eq('coach_id', user.id)
-            );
+            .in('id', clientIds);
 
         if (clientsError) {
             console.error('Error fetching clients:', clientsError);
