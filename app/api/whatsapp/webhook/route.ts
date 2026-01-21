@@ -89,36 +89,30 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Message stored:', message.id);
 
-        // Send email notification to coach
+        // Send email notification to contact@fitbuddy.ch
         try {
-            // Get coach email from the conversation
-            const { data: coachProfile } = await supabase
+            const { sendWhatsAppNotification } = await import('@/lib/email');
+
+            // Get client name from phone lookup if available
+            const { data: clientProfile } = await supabase
                 .from('profiles')
-                .select('email, first_name, last_name')
-                .eq('id', conversation.coach_id)
-                .single();
+                .select('first_name, last_name')
+                .eq('phone', fromPhone)
+                .maybeSingle();
 
-            if (coachProfile?.email) {
-                const { sendWhatsAppNotification } = await import('@/lib/email');
+            const clientName = clientProfile
+                ? `${clientProfile.first_name} ${clientProfile.last_name}`
+                : null;
 
-                // Get client name from phone lookup if available
-                const { data: clientProfile } = await supabase
-                    .from('profiles')
-                    .select('first_name, last_name')
-                    .eq('phone', fromPhone)
-                    .maybeSingle();
+            // Send notification to central email (contact@fitbuddy.ch)
+            const notificationEmail = process.env.NOTIFICATION_TO_EMAIL || 'contact@fitbuddy.ch';
 
-                const clientName = clientProfile
-                    ? `${clientProfile.first_name} ${clientProfile.last_name}`
-                    : null;
-
-                await sendWhatsAppNotification({
-                    coachEmail: coachProfile.email,
-                    clientName: clientName || fromPhone,
-                    clientPhone: fromPhone,
-                    messagePreview: Body?.substring(0, 100) || '',
-                });
-            }
+            await sendWhatsAppNotification({
+                coachEmail: notificationEmail,
+                clientName: clientName || fromPhone,
+                clientPhone: fromPhone,
+                messagePreview: Body?.substring(0, 100) || '',
+            });
         } catch (emailError) {
             // Don't fail the webhook if email fails - message is already saved
             console.error('⚠️ Failed to send email notification:', emailError);

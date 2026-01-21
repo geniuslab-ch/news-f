@@ -19,7 +19,7 @@ export async function sendWhatsAppNotification({
     messagePreview,
 }: SendWhatsAppNotificationParams): Promise<boolean> {
     try {
-        const fromEmail = process.env.NOTIFICATION_FROM_EMAIL || 'notifications@fitbuddy.ch';
+        const fromEmail = process.env.NOTIFICATION_FROM_EMAIL || 'contact@fitbuddy.ch';
 
         await resend.emails.send({
             from: fromEmail,
