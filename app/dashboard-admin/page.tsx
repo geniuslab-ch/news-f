@@ -139,6 +139,12 @@ export default function AdminDashboard() {
                         >
                             Toutes les Sessions
                         </Link>
+                        <Link
+                            href="/dashboard-coach/messages"
+                            className="py-3 px-2 border-b-2 border-transparent text-gray-600 hover:text-gray-900 whitespace-nowrap"
+                        >
+                            Messages WhatsApp
+                        </Link>
                     </div>
                 </nav>
             </header>
