@@ -14,8 +14,11 @@ WHERE email = 'contact@fitbuddy.ch';
 -- VALUES ('UUID_DU_USER_AUTH', 'contact@fitbuddy.ch', 'admin', 'Admin', 'Fitbuddy');
 
 -- 3. Vérifier que les RLS policies permettent à l'admin de tout voir
+-- Drop existing policies if they exist, then recreate
+
 -- Pour profiles : admin peut voir tous les profiles
-CREATE POLICY IF NOT EXISTS "Admins can view all profiles"
+DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
+CREATE POLICY "Admins can view all profiles"
 ON profiles FOR SELECT
 TO authenticated
 USING (
@@ -25,7 +28,8 @@ USING (
 );
 
 -- Pour sessions : admin peut voir toutes les sessions
-CREATE POLICY IF NOT EXISTS "Admins can view all sessions"
+DROP POLICY IF EXISTS "Admins can view all sessions" ON sessions;
+CREATE POLICY "Admins can view all sessions"
 ON sessions FOR SELECT
 TO authenticated
 USING (
@@ -35,7 +39,8 @@ USING (
 );
 
 -- Pour packages : admin peut voir tous les packages
-CREATE POLICY IF NOT EXISTS "Admins can view all packages"
+DROP POLICY IF EXISTS "Admins can view all packages" ON packages;
+CREATE POLICY "Admins can view all packages"
 ON packages FOR SELECT
 TO authenticated
 USING (
@@ -45,7 +50,8 @@ USING (
 );
 
 -- Pour whatsapp : admin peut voir toutes les conversations
-CREATE POLICY IF NOT EXISTS "Admins can view all conversations"
+DROP POLICY IF EXISTS "Admins can view all conversations" ON whatsapp_conversations;
+CREATE POLICY "Admins can view all conversations"
 ON whatsapp_conversations FOR SELECT
 TO authenticated
 USING (
@@ -54,7 +60,8 @@ USING (
     )
 );
 
-CREATE POLICY IF NOT EXISTS "Admins can view all messages"
+DROP POLICY IF EXISTS "Admins can view all messages" ON whatsapp_messages;
+CREATE POLICY "Admins can view all messages"
 ON whatsapp_messages FOR SELECT
 TO authenticated
 USING (
