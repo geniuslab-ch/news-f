@@ -193,8 +193,8 @@ export default function CoachMessagesPage() {
             <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard" className="text-2xl font-bold text-gradient">
-                            Fitbuddy Coach
+                        <Link href="/dashboard-coach">
+                            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition">Fitbuddy Coach</h1>
                         </Link>
                         <span className="text-gray-400">|</span>
                         <h1 className="text-lg font-semibold text-gray-900">Messages WhatsApp</h1>
@@ -296,8 +296,8 @@ export default function CoachMessagesPage() {
                                         >
                                             <div
                                                 className={`max-w-md px-4 py-2 rounded-2xl ${msg.direction === 'outbound'
-                                                        ? 'bg-[#25D366] text-white'
-                                                        : 'bg-white text-gray-900 border border-gray-200'
+                                                    ? 'bg-[#25D366] text-white'
+                                                    : 'bg-white text-gray-900 border border-gray-200'
                                                     }`}
                                             >
                                                 <p className="text-sm whitespace-pre-wrap">{msg.body}</p>

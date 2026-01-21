@@ -139,7 +139,9 @@ export default function SessionsPage() {
             <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-2xl font-bold text-gradient">Fitbuddy Coach</h1>
+                        <Link href="/dashboard-coach">
+                            <h1 className="text-2xl font-bold text-gradient cursor-pointer hover:opacity-80 transition">Fitbuddy Coach</h1>
+                        </Link>
                     </div>
                     <button
                         onClick={handleLogout}
@@ -191,8 +193,8 @@ export default function SessionsPage() {
                     <button
                         onClick={() => setFilter('upcoming')}
                         className={`px-4 py-2 rounded-lg font-medium transition ${filter === 'upcoming'
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
                             }`}
                     >
                         À venir
@@ -200,8 +202,8 @@ export default function SessionsPage() {
                     <button
                         onClick={() => setFilter('past')}
                         className={`px-4 py-2 rounded-lg font-medium transition ${filter === 'past'
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
                             }`}
                     >
                         Passées
@@ -209,8 +211,8 @@ export default function SessionsPage() {
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-4 py-2 rounded-lg font-medium transition ${filter === 'all'
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
                             }`}
                     >
                         Toutes
