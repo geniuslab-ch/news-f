@@ -17,13 +17,29 @@ interface Session {
     };
 }
 
+interface Client {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+}
+
 export default function SessionsPage() {
     const router = useRouter();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [clients, setClients] = useState<Client[]>([]);
+    const [formData, setFormData] = useState({
+        user_id: '',
+        session_date: '',
+        status: 'scheduled',
+    });
+    const [creating, setCreating] = useState(false);
 
     useEffect(() => {
         loadSessions();
+        loadClients();
     }, []);
 
     const loadSessions = async () => {
@@ -46,6 +62,46 @@ export default function SessionsPage() {
             console.error('Error loading sessions:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadClients = async () => {
+        try {
+            const { data } = await supabase
+                .from('profiles')
+                .select('id, email, first_name, last_name')
+                .eq('role', 'client')
+                .order('first_name', { ascending: true });
+
+            setClients(data || []);
+        } catch (error) {
+            console.error('Error loading clients:', error);
+        }
+    };
+
+    const handleCreateSession = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreating(true);
+
+        try {
+            const { error } = await supabase
+                .from('sessions')
+                .insert({
+                    user_id: formData.user_id,
+                    session_date: formData.session_date,
+                    status: formData.status,
+                });
+
+            if (error) throw error;
+
+            alert('Session créée avec succès !');
+            setShowCreateModal(false);
+            setFormData({ user_id: '', session_date: '', status: 'scheduled' });
+            await loadSessions();
+        } catch (error: any) {
+            alert('Erreur: ' + (error.message || 'Impossible de créer la session'));
+        } finally {
+            setCreating(false);
         }
     };
 
@@ -96,7 +152,18 @@ export default function SessionsPage() {
             </header>
 
             <main className="p-6 max-w-7xl mx-auto">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Toutes les Sessions</h2>
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Toutes les Sessions</h2>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Créer une Session
+                    </button>
+                </div>
 
                 {loading ? (
                     <div className="text-center py-12">
@@ -136,6 +203,73 @@ export default function SessionsPage() {
                     </div>
                 )}
             </main>
+
+            {/* Create Session Modal */}
+            {showCreateModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Créer une Session</h3>
+                        <form onSubmit={handleCreateSession} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Client *</label>
+                                <select
+                                    required
+                                    value={formData.user_id}
+                                    onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                                >
+                                    <option value="">Sélectionner un client</option>
+                                    {clients.map((client) => (
+                                        <option key={client.id} value={client.id}>
+                                            {client.first_name} {client.last_name} ({client.email})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Date et Heure *</label>
+                                <input
+                                    type="datetime-local"
+                                    required
+                                    value={formData.session_date}
+                                    onChange={(e) => setFormData({ ...formData, session_date: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                                <select
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                                >
+                                    <option value="scheduled">Planifiée</option>
+                                    <option value="completed">Complétée</option>
+                                    <option value="cancelled">Annulée</option>
+                                    <option value="rescheduled">Reportée</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    disabled={creating}
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                                    disabled={creating}
+                                >
+                                    {creating ? 'Création...' : 'Créer'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
