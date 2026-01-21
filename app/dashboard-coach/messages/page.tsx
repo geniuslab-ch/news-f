@@ -73,7 +73,7 @@ export default function CoachMessagesPage() {
             .eq('id', user.id)
             .single();
 
-        if (profile?.role !== 'coach') {
+        if (profile?.role !== 'coach' && profile?.role !== 'admin') {
             router.push('/dashboard');
             return;
         }
