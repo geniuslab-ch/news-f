@@ -34,7 +34,9 @@ export default function LoginPage() {
                     .single();
 
                 // Redirect based on role
-                if (profile?.role === 'coach') {
+                if (profile?.role === 'admin') {
+                    router.push('/dashboard-admin');
+                } else if (profile?.role === 'coach') {
                     router.push('/dashboard-coach'); // Main dashboard instead of messages
                 } else {
                     router.push('/dashboard');
