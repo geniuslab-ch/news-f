@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
         // Get request body
         const body = await request.json();
-        const { email, password, first_name, last_name } = body;
+        const { email, password, first_name, last_name, phone } = body;
 
         if (!email || !password || !first_name || !last_name) {
             return NextResponse.json({
@@ -69,14 +69,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
         }
 
-        // Update profile with client role and names
+        // Update profile with client role, names, and phone
+        const updateData: any = {
+            role: 'client',
+            first_name,
+            last_name,
+        };
+
+        // Add phone if provided
+        if (phone) {
+            updateData.phone = phone;
+        }
+
         const { error: profileError } = await supabaseAdmin
             .from('profiles')
-            .update({
-                role: 'client',
-                first_name,
-                last_name,
-            })
+            .update(updateData)
             .eq('id', authData.user.id);
 
         if (profileError) {

@@ -30,6 +30,7 @@ export default function ClientsPage() {
         password: '',
         first_name: '',
         last_name: '',
+        phone: '',
     });
     const [creating, setCreating] = useState(false);
 
@@ -85,7 +86,7 @@ export default function ClientsPage() {
 
             alert('Client créé avec succès !');
             setShowAddModal(false);
-            setFormData({ email: '', password: '', first_name: '', last_name: '' });
+            setFormData({ email: '', password: '', first_name: '', last_name: '', phone: '' });
             await loadClients();
         } catch (error: any) {
             alert('Erreur: ' + (error.message || 'Impossible de créer le client'));
@@ -201,6 +202,17 @@ export default function ClientsPage() {
                                     onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                                <input
+                                    type="tel"
+                                    placeholder="+41 XX XXX XX XX"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Format international recommandé (+41...)</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
