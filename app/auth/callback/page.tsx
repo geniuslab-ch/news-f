@@ -24,17 +24,23 @@ export default function AuthCallbackPage() {
             }
 
             // Check if user has a role assigned
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', session.user.id)
                 .single();
 
+            console.log('🔍 Profile data:', profile);
+            console.log('🔍 Profile role:', profile?.role);
+
             // If no role or role is null, redirect to choose-role page
             if (!profile?.role) {
+                console.log('➡️ No role found, redirecting to choose-role');
                 router.push('/choose-role');
                 return;
             }
+
+            console.log('✅ Role found:', profile.role);
 
             // Redirect based on role
             if (profile.role === 'admin') {
