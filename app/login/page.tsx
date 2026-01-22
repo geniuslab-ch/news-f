@@ -119,6 +119,9 @@ export default function LoginPage() {
                                 Créer un compte
                             </Link>
                         </p>
+                        <Link href="/reset-password" className="text-sm text-primary-600 hover:text-primary-700 block font-medium">
+                            Mot de passe oublié?
+                        </Link>
                         <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 block">
                             ← Retour à l'accueil
                         </Link>
