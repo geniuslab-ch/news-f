@@ -21,6 +21,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        {/* Google Ads (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17895357907"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17895357907');
+            `,
+          }}
+        />
+      </head>
       <body className={`${inter.className} antialiased`}>
         {children}
         <WhatsAppWidget />
