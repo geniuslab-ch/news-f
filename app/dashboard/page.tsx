@@ -141,6 +141,9 @@ export default function DashboardPage() {
                         <Link href="/dashboard/book/recurring" className="text-sm font-medium text-gray-600 hover:text-gray-900">
                             📅 Sessions récurrentes
                         </Link>
+                        <Link href="/dashboard/settings" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                            ⚙️ Paramètres
+                        </Link>
                         <div className="flex items-center gap-4 border-l border-gray-300 pl-6">
                             <span className="text-gray-700">
                                 Bonjour, <span className="font-semibold">{profile?.first_name || 'Client'}</span> !
