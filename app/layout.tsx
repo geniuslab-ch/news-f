@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
 
@@ -22,9 +23,17 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
+        {/* Google Ads will be loaded via Script component in body */}
+      </head>
+      <body className={`${inter.className} antialiased`}>
         {/* Google Ads (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17895357907"></script>
-        <script
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17895357907"
+        />
+        <Script
+          id="google-ads-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -34,8 +43,6 @@ export default function RootLayout({
             `,
           }}
         />
-      </head>
-      <body className={`${inter.className} antialiased`}>
         {children}
         <WhatsAppWidget />
       </body>
