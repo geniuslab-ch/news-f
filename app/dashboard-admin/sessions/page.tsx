@@ -44,23 +44,56 @@ export default function SessionsPage() {
 
     const loadSessions = async () => {
         try {
-            const { data, error } = await supabase
+            // Load sessions without join
+            const { data: sessionsData, error: sessionsError } = await supabase
                 .from('sessions')
-                .select(`
-                    *,
-                    profiles (*)
-                `)
+                .select('*')
                 .order('session_date', { ascending: false })
                 .limit(100);
 
-            if (error) {
-                console.error('Error loading sessions:', error);
-                alert(`Erreur de chargement: ${error.message}`);
+            if (sessionsError) {
+                console.error('Error loading sessions:', sessionsError);
+                alert(`Erreur de chargement: ${sessionsError.message}`);
                 return;
             }
 
-            console.log('Sessions loaded:', data?.length || 0);
-            setSessions(data || []);
+            if (!sessionsData || sessionsData.length === 0) {
+                console.log('No sessions found');
+                setSessions([]);
+                return;
+            }
+
+            // Get unique user IDs
+            const userIds = [...new Set(sessionsData.map(s => s.user_id).filter(Boolean))];
+
+            if (userIds.length === 0) {
+                console.log('Sessions loaded but no user_ids:', sessionsData.length);
+                setSessions(sessionsData);
+                return;
+            }
+
+            // Load profiles for these users
+            const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name, email')
+                .in('id', userIds);
+
+            if (profilesError) {
+                console.error('Error loading profiles:', profilesError);
+                // Continue anyway with sessions, just no profile data
+                setSessions(sessionsData);
+                return;
+            }
+
+            // Merge sessions with profiles
+            const profilesMap = new Map((profilesData || []).map(p => [p.id, p]));
+            const enrichedSessions = sessionsData.map(session => ({
+                ...session,
+                profiles: session.user_id ? profilesMap.get(session.user_id) : undefined,
+            }));
+
+            console.log('Sessions loaded:', enrichedSessions.length);
+            setSessions(enrichedSessions);
         } catch (error) {
             console.error('Exception loading sessions:', error);
         } finally {
