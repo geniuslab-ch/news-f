@@ -58,6 +58,10 @@ export async function POST(request: NextRequest) {
             const endDate = new Date(startDate);
             endDate.setDate(endDate.getDate() + parseInt(duration || '30'));
 
+            // Calculate price from Stripe session
+            const amountTotal = session.amount_total || 0;
+            const priceChf = amountTotal / 100;
+
             const packageData = {
                 user_id: userId,
                 package_type: packageType,
@@ -67,6 +71,8 @@ export async function POST(request: NextRequest) {
                 end_date: endDate.toISOString().split('T')[0],
                 status: 'active',
                 stripe_payment_intent: session.payment_intent as string,
+                price_chf: priceChf,
+                amount_paid_cents: amountTotal,
             };
 
             console.log('📦 Creating package:', packageData);
