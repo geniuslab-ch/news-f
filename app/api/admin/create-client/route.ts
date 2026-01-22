@@ -79,6 +79,8 @@ export async function POST(request: NextRequest) {
 
         // Update profile with client role, names, and phone
         const updateData: any = {
+            id: authData.user.id,
+            email: authData.user.email,
             role: 'client',
             first_name,
             last_name,
@@ -89,10 +91,10 @@ export async function POST(request: NextRequest) {
             updateData.phone = phone;
         }
 
+        // Use upsert instead of update to handle case where trigger hasn't run or doesn't exist
         const { error: profileError } = await supabaseAdmin
             .from('profiles')
-            .update(updateData)
-            .eq('id', authData.user.id);
+            .upsert(updateData);
 
         if (profileError) {
             console.error('Error updating profile:', profileError);
