@@ -4,13 +4,12 @@ import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Admin client for bypassing RLS
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
 export async function POST(request: NextRequest) {
+    // Admin client for bypassing RLS - initialized inside handler for build safety
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     const body = await request.text();
     const headersList = await headers();
     const signature = headersList.get('stripe-signature');

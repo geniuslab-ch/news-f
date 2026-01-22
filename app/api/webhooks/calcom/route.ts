@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Admin client for bypassing RLS
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 interface CalComAttendee {
     email: string;
@@ -28,6 +22,12 @@ interface CalComWebhookPayload {
 }
 
 export async function POST(request: NextRequest) {
+    // Initialize Supabase inside handler for build safety
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     try {
         const body: CalComWebhookPayload = await request.json();
 
@@ -44,15 +44,15 @@ export async function POST(request: NextRequest) {
 
         switch (triggerEvent) {
             case 'BOOKING_CREATED':
-                await handleBookingCreated(payload);
+                await handleBookingCreated(payload, supabaseAdmin);
                 break;
 
             case 'BOOKING_CANCELLED':
-                await handleBookingCancelled(payload);
+                await handleBookingCancelled(payload, supabaseAdmin);
                 break;
 
             case 'BOOKING_RESCHEDULED':
-                await handleBookingRescheduled(payload);
+                await handleBookingRescheduled(payload, supabaseAdmin);
                 break;
 
             default:
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function handleBookingCreated(booking: CalComBooking) {
+async function handleBookingCreated(booking: CalComBooking, supabaseAdmin: SupabaseClient) {
     console.log('📝 Creating session from booking:', booking.uid);
 
     // Find user by email
@@ -195,7 +195,7 @@ async function handleBookingCreated(booking: CalComBooking) {
 
 }
 
-async function handleBookingCancelled(booking: CalComBooking) {
+async function handleBookingCancelled(booking: CalComBooking, supabaseAdmin: SupabaseClient) {
     console.log('❌ Cancelling session for booking:', booking.uid);
 
     const { data: session, error } = await supabaseAdmin
@@ -238,7 +238,7 @@ async function handleBookingCancelled(booking: CalComBooking) {
     }
 }
 
-async function handleBookingRescheduled(booking: CalComBooking) {
+async function handleBookingRescheduled(booking: CalComBooking, supabaseAdmin: SupabaseClient) {
     console.log('🔄 Rescheduling session for booking:', booking.uid);
 
     const start = new Date(booking.startTime);

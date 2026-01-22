@@ -2,23 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
 
-// Use SERVICE ROLE key to bypass RLS for public widget
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false
-        }
-    }
-);
-
-const twilioClient = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
-
 /**
  * POST /api/whatsapp/send-public
  * 
@@ -27,6 +10,23 @@ const twilioClient = twilio(
  * Creates conversation assigned to first available coach
  */
 export async function POST(request: NextRequest) {
+    // Use SERVICE ROLE key to bypass RLS for public widget - init inside handler
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    );
+
+    const twilioClient = twilio(
+        process.env.TWILIO_ACCOUNT_SID,
+        process.env.TWILIO_AUTH_TOKEN
+    );
+
     try {
         const body = await request.json();
         const { to, name, message } = body;
