@@ -44,7 +44,7 @@ export default function SessionsPage() {
 
     const loadSessions = async () => {
         try {
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('sessions')
                 .select(`
                     *,
@@ -57,9 +57,16 @@ export default function SessionsPage() {
                 .order('session_date', { ascending: false })
                 .limit(100);
 
+            if (error) {
+                console.error('Error loading sessions:', error);
+                alert(`Erreur de chargement: ${error.message}`);
+                return;
+            }
+
+            console.log('Sessions loaded:', data?.length || 0);
             setSessions(data || []);
         } catch (error) {
-            console.error('Error loading sessions:', error);
+            console.error('Exception loading sessions:', error);
         } finally {
             setLoading(false);
         }
@@ -84,19 +91,26 @@ export default function SessionsPage() {
         setCreating(true);
 
         try {
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('sessions')
                 .insert({
                     user_id: formData.user_id,
                     session_date: formData.session_date,
                     status: formData.status,
-                });
+                })
+                .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Session creation error:', error);
+                throw error;
+            }
 
+            console.log('Session created:', data);
             alert('Session créée avec succès !');
             setShowCreateModal(false);
             setFormData({ user_id: '', session_date: '', status: 'scheduled' });
+
+            // Reload the sessions list
             await loadSessions();
         } catch (error: any) {
             alert('Erreur: ' + (error.message || 'Impossible de créer la session'));
