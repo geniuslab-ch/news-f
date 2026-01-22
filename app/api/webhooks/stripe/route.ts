@@ -45,10 +45,35 @@ export async function POST(request: NextRequest) {
             console.log('✅ Checkout session completed:', session.id);
             console.log('Metadata:', session.metadata);
 
-            const { userId, packageType, sessions, duration } = session.metadata || {};
+            let userId = session.metadata?.userId;
+            let packageType = session.metadata?.packageType;
+            let sessions = session.metadata?.sessions;
+            let duration = session.metadata?.duration;
+
+            // Fallback: Check subscription metadata if session metadata is missing
+            if ((!userId || !packageType) && session.subscription) {
+                console.log('⚠️ Metadata missing in session, checking subscription...');
+                try {
+                    const subscriptionId = typeof session.subscription === 'string'
+                        ? session.subscription
+                        : session.subscription.id;
+
+                    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+                    if (subscription.metadata) {
+                         console.log('✅ Found subscription metadata:', subscription.metadata);
+                         userId = userId || subscription.metadata.userId;
+                         packageType = packageType || subscription.metadata.packageType;
+                         sessions = sessions || subscription.metadata.sessions;
+                         duration = duration || subscription.metadata.duration;
+                    }
+                } catch (subError) {
+                    console.error('❌ Error retrieving subscription:', subError);
+                }
+            }
 
             if (!userId || !packageType) {
-                console.error('❌ Missing metadata in session');
+                console.error('❌ Missing metadata in session and subscription');
                 return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
             }
 
