@@ -26,7 +26,7 @@ export default function RootLayout({
         {/* Google Ads will be loaded via Script component in body */}
       </head>
       <body className={`${inter.className} antialiased`}>
-        {/* Google Ads (gtag.js) */}
+        {/* Google Ads Conversion Tracking - AW-17895357907 */}
         <Script
           strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=AW-17895357907"
