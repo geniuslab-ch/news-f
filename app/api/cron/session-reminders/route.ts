@@ -46,8 +46,8 @@ export async function GET() {
 
             console.log(`Session ${session.id} in ${hoursUntil.toFixed(1)}h`);
 
-            // Send reminder 2 hours before (but not more than 24h)
-            if (hoursUntil >= 2 && hoursUntil <= 24) {
+            // Send reminder 30 minutes to 24 hours before
+            if (hoursUntil >= 0.5 && hoursUntil <= 24) {
                 const result = await sendSessionReminder({
                     to: session.profiles.phone,
                     clientName: session.profiles.first_name || 'Client',
