@@ -5,40 +5,46 @@ const client = twilio(
     process.env.TWILIO_AUTH_TOKEN
 );
 
+/**
+ * Send WhatsApp session reminder using approved Twilio content templates
+ * French template: HX3671de98cf154963cce7c2696b5f7461
+ * English template: HXb97ca9778836a6c03f34f7a7589b70d4
+ */
 export async function sendSessionReminder(params: {
     to: string; // Format: +41791234567
     clientName: string;
     sessionDate: string;
     sessionTime: string;
     meetingLink: string;
+    language?: 'fr' | 'en'; // Default to French
 }) {
-    const { to, clientName, sessionDate, sessionTime, meetingLink } = params;
+    const { to, clientName, sessionDate, sessionTime, meetingLink, language = 'fr' } = params;
 
-    const message = `Bonjour ${clientName} ! 👋
-
-Rappel : votre session de coaching est prévue le ${sessionDate} à ${sessionTime}.
-
-📅 Date : ${sessionDate}
-🕐 Heure : ${sessionTime}
-⏱️ Durée : 45 minutes
-
-Lien de connexion Google Meet : 
-${meetingLink}
-
-À très bientôt ! 💪
-Fitbuddy`;
+    // Select template based on language
+    const templateSid = language === 'en'
+        ? 'HXb97ca9778836a6c03f34f7a7589b70d4'  // English
+        : 'HX3671de98cf154963cce7c2696b5f7461'; // French
 
     try {
+        // Twilio content templates use contentSid and contentVariables
+        // Standard variables: typically {{1}}, {{2}}, {{3}}, {{4}}
+        // Assuming: 1=clientName, 2=sessionDate, 3=sessionTime, 4=meetingLink
         const result = await client.messages.create({
             from: process.env.TWILIO_WHATSAPP_FROM, // whatsapp:+14155238886
             to: `whatsapp:${to}`, // whatsapp:+41791234567
-            body: message,
+            contentSid: templateSid,
+            contentVariables: JSON.stringify({
+                '1': clientName,
+                '2': sessionDate,
+                '3': sessionTime,
+                '4': meetingLink,
+            }),
         });
 
-        console.log('✅ WhatsApp sent:', result.sid);
+        console.log(`✅ WhatsApp template (${language}) sent:`, result.sid);
         return { success: true, sid: result.sid };
     } catch (error: any) {
-        console.error('❌ WhatsApp error:', error);
+        console.error('❌ WhatsApp template error:', error);
         return { success: false, error: error.message };
     }
 }

@@ -20,7 +20,8 @@ export async function GET() {
         *,
         profiles!sessions_user_id_fkey (
           first_name,
-          phone
+          phone,
+          language
         )
       `)
             .eq('status', 'scheduled')
@@ -53,6 +54,7 @@ export async function GET() {
                     sessionDate: new Date(session.session_date).toLocaleDateString('fr-CH'),
                     sessionTime: session.scheduled_time?.substring(0, 5) || '10:00',
                     meetingLink: session.meeting_link || session.google_meet_link || 'Lien à venir',
+                    language: session.profiles.language || 'fr', // Use client's language preference
                 });
 
                 if (result.success) {
