@@ -48,7 +48,7 @@ export default function SessionsPage() {
                 .from('sessions')
                 .select(`
                     *,
-                    profiles:user_id (
+                    profiles!sessions_user_id_fkey (
                         first_name,
                         last_name,
                         email
