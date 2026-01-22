@@ -42,10 +42,6 @@ DROP POLICY IF EXISTS "Admins can view all packages" ON public.packages;
 DROP POLICY IF EXISTS "Admins can view all sessions" ON public.sessions;
 
 -- Create robust Admin policies
--- Note: We use a direct check on the profiles table.
--- To prevent recursion issues, Supabase handles simple self-referencing policies well,
--- but a safer pattern is often used. Here we stick to the standard pattern.
-
 CREATE POLICY "Admins can view all profiles"
 ON public.profiles FOR SELECT
 TO authenticated
@@ -70,7 +66,10 @@ USING (
     (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'))
 );
 
-RAISE NOTICE 'RLS policies for Admins updated.';
+DO $$
+BEGIN
+    RAISE NOTICE 'RLS policies for Admins updated.';
+END $$;
 
 -- =============================================
 -- 3. DATA REPAIR: ADMIN USER
@@ -80,7 +79,10 @@ UPDATE public.profiles
 SET role = 'admin'
 WHERE email = 'contact@fitbuddy.ch';
 
-RAISE NOTICE 'Ensured contact@fitbuddy.ch is admin.';
+DO $$
+BEGIN
+    RAISE NOTICE 'Ensured contact@fitbuddy.ch is admin.';
+END $$;
 
 -- =============================================
 -- 4. DATA REPAIR: NOURA (Profile & Package)
