@@ -18,12 +18,15 @@ export async function GET(request: NextRequest) {
             }, { status: 400 });
         }
 
+        // Ensure phone starts with +
+        const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+
         // Test data
         const testDate = new Date();
         testDate.setHours(testDate.getHours() + 24); // Tomorrow at same time
 
         const result = await sendSessionReminder({
-            to: phone,
+            to: formattedPhone,
             clientName: 'Test Client',
             sessionDate: testDate.toLocaleDateString('fr-CH'),
             sessionTime: '14:00',
@@ -34,7 +37,7 @@ export async function GET(request: NextRequest) {
         if (result.success) {
             return NextResponse.json({
                 success: true,
-                message: `✅ Test reminder sent to ${phone}`,
+                message: `✅ Test reminder sent to ${formattedPhone}`,
                 language: lang,
                 template: lang === 'fr' ? 'HX3671de98cf154963cce7c2696b5f7461' : 'HXb97ca9778836a6c03f34f7a7589b70d4',
                 sid: result.sid,

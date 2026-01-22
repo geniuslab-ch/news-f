@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Service role client for admin operations (bypasses RLS)
+const adminClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // Will upgrade on server side
+);
 
 interface Client {
     id: string;
@@ -51,27 +58,29 @@ export default function ClientsPage() {
         setCreating(true);
 
         try {
-            // Create auth user
-            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-                email: formData.email,
-                password: formData.password,
-                email_confirm: true,
+            // Get current session for authorization
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                alert('Session expirée. Veuillez vous reconnecter.');
+                router.push('/login');
+                return;
+            }
+
+            // Call API endpoint to create client
+            const response = await fetch('/api/admin/create-client', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify(formData),
             });
 
-            if (authError) throw authError;
+            const data = await response.json();
 
-            // Update profile to client role
-            if (authData.user) {
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .update({
-                        role: 'client',
-                        first_name: formData.first_name,
-                        last_name: formData.last_name,
-                    })
-                    .eq('id', authData.user.id);
-
-                if (profileError) throw profileError;
+            if (!response.ok) {
+                throw new Error(data.error || 'Échec de la création du client');
             }
 
             alert('Client créé avec succès !');
