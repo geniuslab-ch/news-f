@@ -48,11 +48,7 @@ export default function SessionsPage() {
                 .from('sessions')
                 .select(`
                     *,
-                    profiles!sessions_user_id_fkey (
-                        first_name,
-                        last_name,
-                        email
-                    )
+                    profiles (*)
                 `)
                 .order('session_date', { ascending: false })
                 .limit(100);
