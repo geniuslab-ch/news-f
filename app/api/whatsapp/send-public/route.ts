@@ -119,6 +119,25 @@ export async function POST(request: NextRequest) {
             console.error('❌ Error storing message:', messageError);
         } else {
             console.log('✅ Message stored in database');
+
+            // Send email notification to contact@fitbuddy.ch
+            try {
+                const { sendWhatsAppNotification } = await import('@/lib/email');
+
+                const notificationEmail = process.env.NOTIFICATION_TO_EMAIL || 'contact@fitbuddy.ch';
+
+                await sendWhatsAppNotification({
+                    coachEmail: notificationEmail,
+                    clientName: name || toPhone,
+                    clientPhone: toPhone,
+                    messagePreview: message.substring(0, 100) || '',
+                });
+
+                console.log('✅ Email notification sent to:', notificationEmail);
+            } catch (emailError) {
+                // Don't fail the API if email fails - message is already sent and saved
+                console.error('⚠️ Failed to send email notification:', emailError);
+            }
         }
 
         return NextResponse.json({
