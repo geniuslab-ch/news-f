@@ -1,20 +1,23 @@
--- Fix for Stripe Webhook issues
--- 1. Add stripe_payment_intent column to packages table
--- 2. Make price_chf nullable (optional, but safer if webhook misses it) or we ensure webhook sends it.
---    We'll keep it NOT NULL but handle it in code, or make it nullable to be safe.
---    Let's make it nullable to prevent failures if amount is missing.
+-- Fix for Stripe Webhook issues - UPDATED
+-- Run this in Supabase SQL Editor
 
+-- 1. Add stripe_payment_intent column if it doesn't exist
 ALTER TABLE public.packages
 ADD COLUMN IF NOT EXISTS stripe_payment_intent TEXT;
 
+-- 2. Add price_chf column if it doesn't exist (User reported it missing)
+ALTER TABLE public.packages
+ADD COLUMN IF NOT EXISTS price_chf DECIMAL(10,2);
+
+-- 3. Make price_chf nullable (safer if webhook doesn't provide it immediately)
 ALTER TABLE public.packages
 ALTER COLUMN price_chf DROP NOT NULL;
 
--- Optional: Add a column for the raw amount if we want to store it exactly as from Stripe
+-- 4. Add amount_paid_cents for raw Stripe amount
 ALTER TABLE public.packages
 ADD COLUMN IF NOT EXISTS amount_paid_cents INT;
 
--- Verify the columns exist
-SELECT column_name, data_type
+-- 5. Verify the columns exist
+SELECT column_name, data_type, is_nullable
 FROM information_schema.columns
 WHERE table_name = 'packages';
