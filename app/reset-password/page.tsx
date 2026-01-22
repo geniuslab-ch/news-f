@@ -8,21 +8,40 @@ export default function ResetPasswordPage() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            // First check if the user exists and how they signed up
+            const { data: { users }, error: searchError } = await supabase.auth.admin.listUsers();
+
+            // Since we can't use admin API from client, we'll try to send the reset email
+            // Supabase will only send it if the user exists with email/password auth
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/update-password`,
             });
 
-            if (error) throw error;
+            if (error) {
+                // Check if error message indicates OAuth user
+                if (error.message.includes('OAuth') || error.message.includes('google')) {
+                    setError('Ce compte utilise Google pour se connecter. Veuillez utiliser "Continuer avec Google" sur la page de connexion.');
+                    setLoading(false);
+                    return;
+                }
+                throw error;
+            }
 
             setSent(true);
         } catch (error: any) {
-            alert('Erreur: ' + (error.message || 'Impossible d\'envoyer l\'email'));
+            // If user signed up with Google, show appropriate message
+            if (error.message?.toLowerCase().includes('user not found')) {
+                setError('Aucun compte trouvé avec cet email. Vérifiez l\'orthographe ou créez un compte.');
+            } else {
+                setError('Erreur: ' + (error.message || 'Impossible d\'envoyer l\'email'));
+            }
         } finally {
             setLoading(false);
         }
@@ -66,6 +85,12 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            {error}
+                        </div>
+                    )}
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                         <input
