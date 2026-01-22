@@ -4,13 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { createClient } from '@supabase/supabase-js';
-
-// Service role client for admin operations (bypasses RLS)
-const adminClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // Will upgrade on server side
-);
 
 interface Client {
     id: string;

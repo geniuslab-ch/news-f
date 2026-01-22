@@ -2,17 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendSessionReminder } from '@/lib/twilio-whatsapp';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 /**
  * Manual trigger endpoint for session reminders
  * Call this to send reminders immediately for testing
  * GET /api/test/trigger-reminders
  */
 export async function GET(request: NextRequest) {
+    // Initialize Supabase inside handler for build safety
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     try {
         const now = new Date();
 
