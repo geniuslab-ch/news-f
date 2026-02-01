@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
             .eq('id', user.id)
             .single();
 
-        if (profile?.role !== 'coach') {
+        if (profile?.role !== 'coach' && profile?.role !== 'admin') {
             return NextResponse.json(
                 { error: 'Only coaches can send messages' },
                 { status: 403 }
@@ -89,22 +89,33 @@ export async function POST(request: NextRequest) {
         let conversation;
         if (conversationId) {
             // Use existing conversation
-            const { data } = await supabase
+            // Use existing conversation
+            let query = supabase
                 .from('whatsapp_conversations')
                 .select('*')
-                .eq('id', conversationId)
-                .eq('coach_id', user.id) // Security check
-                .single();
+                .eq('id', conversationId);
+
+            // Only restrict by coach_id if not admin
+            if (profile.role !== 'admin') {
+                query = query.eq('coach_id', user.id);
+            }
+
+            const { data } = await query.single();
 
             conversation = data;
         } else {
             // Find or create conversation
-            const { data: existing } = await supabase
+            // Find or create conversation
+            let query = supabase
                 .from('whatsapp_conversations')
                 .select('*')
-                .eq('client_phone', toPhone)
-                .eq('coach_id', user.id)
-                .maybeSingle();
+                .eq('client_phone', toPhone);
+
+            if (profile.role !== 'admin') {
+                query = query.eq('coach_id', user.id);
+            }
+            
+            const { data: existing } = await query.maybeSingle();
 
             if (existing) {
                 conversation = existing;
