@@ -33,10 +33,15 @@ export default function AuthCallbackPage() {
             console.log('🔍 Profile data:', profile);
             console.log('🔍 Profile role:', profile?.role);
 
-            // If no role or role is null, redirect to choose-role page
+            // If no role or role is null, update to client and redirect to dashboard
             if (!profile?.role) {
-                console.log('➡️ No role found, redirecting to choose-role');
-                router.push('/choose-role');
+                console.log('➡️ No role found, defaulting to client');
+                await supabase
+                    .from('profiles')
+                    .update({ role: 'client' })
+                    .eq('id', session.user.id);
+
+                router.push('/dashboard');
                 return;
             }
 

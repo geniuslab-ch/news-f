@@ -13,6 +13,8 @@ export interface StripeProduct {
     features: string[];
     recommended?: boolean;
     badge?: string;
+    monthlyPrice?: number;
+    paymentLink?: string;
 }
 
 export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
@@ -46,6 +48,8 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
         ],
         recommended: true,
         badge: 'Populaire',
+        monthlyPrice: 185, // 555 / 3
+        paymentLink: 'https://buy.stripe.com/14A5kCbp27HHcM642NcAo05',
     },
     '6months': {
         priceId: (process.env.NEXT_PUBLIC_STRIPE_PRICE_6MONTHS || 'price_6months_placeholder').trim(),
@@ -63,6 +67,8 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
             'Support 7j/7',
         ],
         badge: 'Meilleure valeur',
+        monthlyPrice: 175, // 1050 / 6
+        paymentLink: 'https://buy.stripe.com/fZucN464IbXXaDY1UFcAo06',
     },
     '12months': {
         priceId: (process.env.NEXT_PUBLIC_STRIPE_PRICE_12MONTHS || 'price_12months_placeholder').trim(),
@@ -80,6 +86,8 @@ export const STRIPE_PRODUCTS: Record<PackageType, StripeProduct> = {
             'Communauté VIP',
             'Support illimité',
         ],
+        monthlyPrice: 165, // 1980 / 12
+        paymentLink: 'https://buy.stripe.com/3cI8wO9gUgedh2mdDncAo07',
     },
 };
 

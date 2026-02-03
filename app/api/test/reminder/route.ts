@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendSessionReminder } from '@/lib/twilio-whatsapp';
+import { sanitizePhoneNumber } from '@/lib/phone-utils';
 
 /**
  * Test endpoint for session reminder WhatsApp templates
@@ -18,8 +19,9 @@ export async function GET(request: NextRequest) {
             }, { status: 400 });
         }
 
-        // Ensure phone starts with +
-        const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+        // Sanitize and validate phone number
+        const formattedPhone = sanitizePhoneNumber(phone);
+
 
         // Test data
         const testDate = new Date();

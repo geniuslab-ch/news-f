@@ -45,6 +45,12 @@ export default function GlobalNav() {
                     >
                         Programmes
                     </Link>
+                    <Link
+                        href="/entreprises"
+                        className="text-sm font-medium text-gray-700 hover:text-primary-600 transition"
+                    >
+                        Entreprises
+                    </Link>
 
                     {isLoggedIn ? (
                         <Link

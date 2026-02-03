@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
+import { sanitizePhoneNumber } from '@/lib/phone-utils';
 
 /**
  * POST /api/whatsapp/send-public
@@ -44,8 +45,8 @@ export async function POST(request: NextRequest) {
             message: message.substring(0, 50),
         });
 
-        // Format phone number for Twilio
-        const toPhone = to.startsWith('+') ? to : `+${to}`;
+        // Sanitize and format phone number for Twilio
+        const toPhone = sanitizePhoneNumber(to);
         const fromPhone = process.env.TWILIO_WHATSAPP_FROM!;
 
         // Send message via Twilio

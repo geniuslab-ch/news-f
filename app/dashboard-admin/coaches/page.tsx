@@ -51,27 +51,23 @@ export default function CoachesPage() {
         setCreating(true);
 
         try {
-            // Create auth user
-            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-                email: formData.email,
-                password: formData.password,
-                email_confirm: true,
+            const response = await fetch('/api/admin/coaches/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password,
+                    first_name: formData.first_name,
+                    last_name: formData.last_name,
+                }),
             });
 
-            if (authError) throw authError;
+            const data = await response.json();
 
-            // Update profile to coach role
-            if (authData.user) {
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .update({
-                        role: 'coach',
-                        first_name: formData.first_name,
-                        last_name: formData.last_name,
-                    })
-                    .eq('id', authData.user.id);
-
-                if (profileError) throw profileError;
+            if (!response.ok) {
+                throw new Error(data.error || 'Erreur lors de la création du coach');
             }
 
             alert('Coach créé avec succès !');
@@ -79,7 +75,7 @@ export default function CoachesPage() {
             setFormData({ email: '', password: '', first_name: '', last_name: '' });
             await loadCoaches();
         } catch (error: any) {
-            alert('Erreur: ' + (error.message || 'Impossible de créer le coach'));
+            alert('Erreur: ' + error.message);
         } finally {
             setCreating(false);
         }

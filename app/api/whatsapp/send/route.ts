@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
+import { sanitizePhoneNumber } from '@/lib/phone-utils';
 
 const twilioClient = twilio(
     process.env.TWILIO_ACCOUNT_SID,
@@ -72,8 +73,8 @@ export async function POST(request: NextRequest) {
             coachId: user.id,
         });
 
-        // Format phone number for Twilio
-        const toPhone = to.startsWith('+') ? to : `+${to}`;
+        // Sanitize and format phone number for Twilio
+        const toPhone = sanitizePhoneNumber(to);
         const fromPhone = process.env.TWILIO_WHATSAPP_FROM!;
 
         // Send message via Twilio
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
             if (profile.role !== 'admin') {
                 query = query.eq('coach_id', user.id);
             }
-            
+
             const { data: existing } = await query.maybeSingle();
 
             if (existing) {

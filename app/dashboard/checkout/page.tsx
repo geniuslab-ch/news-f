@@ -16,6 +16,7 @@ function CheckoutContent() {
     const [purchasing, setPurchasing] = useState<PackageType | null>(null);
     const [selectedProgram, setSelectedProgram] = useState<string>('');
     const [highlightedPackage, setHighlightedPackage] = useState<PackageType | null>(null);
+    const [paymentMode, setPaymentMode] = useState<'once' | 'monthly'>('once');
 
     useEffect(() => {
         loadUser();
@@ -26,6 +27,11 @@ function CheckoutContent() {
 
         if (program) {
             setSelectedProgram(program);
+        }
+
+        const modeParam = searchParams.get('mode');
+        if (modeParam === 'monthly') {
+            setPaymentMode('monthly');
         }
 
         if (duration) {
@@ -62,6 +68,12 @@ function CheckoutContent() {
 
         try {
             const product = STRIPE_PRODUCTS[packageType];
+
+            // Handle monthly payment link redirect
+            if (paymentMode === 'monthly' && product.paymentLink) {
+                window.location.href = product.paymentLink;
+                return;
+            }
 
             const response = await fetch('/api/checkout/create-session', {
                 method: 'POST',
@@ -135,6 +147,30 @@ function CheckoutContent() {
                         )}
                     </div>
 
+                    {/* Payment Mode Toggle */}
+                    <div className="flex justify-center mb-12">
+                        <div className="bg-gray-100 p-1 rounded-lg flex items-center">
+                            <button
+                                onClick={() => setPaymentMode('once')}
+                                className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${paymentMode === 'once'
+                                    ? 'bg-white text-primary-600 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                Paiement unique
+                            </button>
+                            <button
+                                onClick={() => setPaymentMode('monthly')}
+                                className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${paymentMode === 'monthly'
+                                    ? 'bg-white text-primary-600 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                Paiement mensuel
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Pricing Cards */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {products.map((product) => (
@@ -142,10 +178,10 @@ function CheckoutContent() {
                                 key={product.type}
                                 id={`package-${product.type}`}
                                 className={`relative bg-white rounded-2xl p-6 shadow-xl border-2 transition-all hover:scale-105 ${highlightedPackage === product.type
-                                        ? 'border-primary-500 ring-4 ring-primary-100 bg-primary-50'
-                                        : product.recommended
-                                            ? 'border-primary-500 ring-4 ring-primary-100'
-                                            : 'border-gray-200 hover:border-primary-300'
+                                    ? 'border-primary-500 ring-4 ring-primary-100 bg-primary-50'
+                                    : product.recommended
+                                        ? 'border-primary-500 ring-4 ring-primary-100'
+                                        : 'border-gray-200 hover:border-primary-300'
                                     }`}
                             >
                                 {/* Badge */}
@@ -157,25 +193,44 @@ function CheckoutContent() {
                                     </div>
                                 )}
 
-                                {/* Header */}
-                                <div className="text-center mb-6">
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
-                                    <div className="flex items-baseline justify-center gap-1">
-                                        <span className="text-4xl font-extrabold text-gradient">CHF {product.price}</span>
-                                    </div>
-                                    <p className="text-sm text-gray-600 mt-2">{product.description}</p>
-                                </div>
+                                {(() => {
+                                    const showMonthly = paymentMode === 'monthly' && product.monthlyPrice;
+                                    const displayPrice = showMonthly ? product.monthlyPrice : product.price;
 
-                                {/* Sessions */}
-                                <div className="mb-6 p-4 bg-primary-50 rounded-lg">
-                                    <div className="text-center">
-                                        <span className="text-3xl font-bold text-primary-600">{product.sessions}</span>
-                                        <p className="text-sm text-gray-700">sessions de coaching</p>
-                                        <p className="text-xs text-gray-600 mt-1">
-                                            {Math.round((product.price / product.sessions) * 100) / 100} CHF/session
-                                        </p>
-                                    </div>
-                                </div>
+                                    return (
+                                        <>
+                                            {/* Header */}
+                                            <div className="text-center mb-6">
+                                                <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                                                <div className="flex items-baseline justify-center gap-1">
+                                                    <span className="text-4xl font-extrabold text-gradient">
+                                                        CHF {displayPrice}
+                                                    </span>
+                                                    {showMonthly && <span className="text-sm text-gray-500">/mois</span>}
+                                                </div>
+                                                <p className="text-sm text-gray-600 mt-2">{product.description}</p>
+                                                {showMonthly && (
+                                                    <p className="text-xs text-primary-600 font-medium bg-primary-50 py-1 px-2 rounded-full inline-block mt-2">
+                                                        Engagement {product.duration} jours
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Sessions */}
+                                            <div className="mb-6 p-4 bg-primary-50 rounded-lg">
+                                                <div className="text-center">
+                                                    <span className="text-3xl font-bold text-primary-600">{product.sessions}</span>
+                                                    <p className="text-sm text-gray-700">sessions de coaching</p>
+                                                    {!showMonthly && (
+                                                        <p className="text-xs text-gray-600 mt-1">
+                                                            {Math.round((product.price / product.sessions) * 100) / 100} CHF/session
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    );
+                                })()}
 
                                 {/* Features */}
                                 <ul className="space-y-3 mb-6">

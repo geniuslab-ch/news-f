@@ -56,6 +56,7 @@ export default function SignupPage() {
                     .update({
                         first_name: formData.firstName,
                         last_name: formData.lastName,
+                        role: 'client', // Default role
                     })
                     .eq('id', data.user.id);
 
