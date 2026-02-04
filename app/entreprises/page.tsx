@@ -62,26 +62,24 @@ export default function EntreprisesPage() {
         setSubmitStatus('idle');
 
         try {
-            // Send email via mailto
-            const subject = `Demande de réunion de découverte - ${formData.company}`;
-            const body = `
-Nouvelle demande de réunion de découverte
+            const response = await fetch('/api/entreprises/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
 
-Entreprise: ${formData.company}
-Nom du contact: ${formData.name}
-Email: ${formData.email}
-Téléphone: ${formData.phone}
-Nombre d'employés: ${formData.employees}
+            const data = await response.json();
 
-Message:
-${formData.message}
-            `.trim();
-
-            window.location.href = `mailto:contact@fitbuddy.ch?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            if (!response.ok) {
+                throw new Error(data.error || 'Erreur lors de l\'envoi');
+            }
 
             setSubmitStatus('success');
             setFormData({ company: '', name: '', email: '', phone: '', employees: '', message: '' });
         } catch (error) {
+            console.error('Form submission error:', error);
             setSubmitStatus('error');
         } finally {
             setIsSubmitting(false);
