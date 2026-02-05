@@ -79,7 +79,7 @@ export default function DashboardPage() {
             const result = await cancelSession(sessionId, user.id);
 
             if (result.error) {
-                alert(`Erreur: ${result.error.message || 'Impossible d\\'annuler la session'}`);
+                alert(`Erreur: ${result.error.message || 'Impossible d\'annuler la session'}`);
                 return;
             }
 
