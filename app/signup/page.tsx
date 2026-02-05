@@ -11,6 +11,7 @@ export default function SignupPage() {
         firstName: '',
         lastName: '',
         email: '',
+        phone: '',
         password: '',
         confirmPassword: '',
     });
@@ -32,6 +33,11 @@ export default function SignupPage() {
             return;
         }
 
+        if (!formData.phone) {
+            setError('Le numéro WhatsApp est requis');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -43,6 +49,7 @@ export default function SignupPage() {
                     data: {
                         first_name: formData.firstName,
                         last_name: formData.lastName,
+                        phone: formData.phone,
                     },
                 },
             });
@@ -50,12 +57,13 @@ export default function SignupPage() {
             if (error) throw error;
 
             if (data.user) {
-                // Update profile with names
+                // Update profile with names and phone
                 const { error: profileError } = await supabase
                     .from('profiles')
                     .update({
                         first_name: formData.firstName,
                         last_name: formData.lastName,
+                        phone: formData.phone,
                         role: 'client', // Default role
                     })
                     .eq('id', data.user.id);
@@ -153,6 +161,24 @@ export default function SignupPage() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
                                 placeholder="votre@email.com"
                             />
+                        </div>
+
+                        <div>
+                            <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+                                Numéro WhatsApp * 📱
+                            </label>
+                            <input
+                                type="tel"
+                                id="phone"
+                                required
+                                value={formData.phone}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                                placeholder="+41 79 123 45 67"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Pour recevoir les liens Google Meet de vos séances
+                            </p>
                         </div>
 
                         <div>

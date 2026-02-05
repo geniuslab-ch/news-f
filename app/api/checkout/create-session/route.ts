@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getProduct, type PackageType } from '@/lib/stripe-config';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
     try {
@@ -19,6 +20,21 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+
+        // Get user email from Supabase
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', userId)
+            .single();
+
+        const userEmail = profile?.email || undefined;
+        console.log('📧 User email:', userEmail);
 
         const product = getProduct(packageType);
         const origin = request.headers.get('origin') || 'https://news-f-phi.vercel.app';
@@ -46,7 +62,7 @@ export async function POST(request: NextRequest) {
                     duration: product.duration.toString(),
                 },
             },
-            customer_email: undefined, // Will be filled by Stripe from user input
+            customer_email: userEmail, // Pre-fill with user's email
             allow_promotion_codes: true,
         });
 
