@@ -28,7 +28,6 @@ export default function DashboardPage() {
 
     const loadDashboard = async () => {
         try {
-            // Get user
             const { data: { user } } = await supabase.auth.getUser();
 
             if (!user) {
@@ -38,7 +37,6 @@ export default function DashboardPage() {
 
             setUser(user);
 
-            // Get profile
             const { data: profileData } = await supabase
                 .from('profiles')
                 .select('*')
@@ -47,15 +45,12 @@ export default function DashboardPage() {
 
             setProfile(profileData);
 
-            // Get active package
             const { data: packageData } = await getActivePackage(user.id);
             setActivePackage(packageData);
 
-            // Get next session
             const { data: nextSessionData } = await getNextSession(user.id);
             setNextSession(nextSessionData);
 
-            // Get recent sessions
             const { data: sessionsData } = await getUserSessions(user.id);
             setRecentSessions(sessionsData?.slice(0, 3) || []);
 
@@ -75,32 +70,22 @@ export default function DashboardPage() {
     const handleCancel = async (sessionId: string) => {
         if (!user) return;
 
-        console.log('🔴 Cancel clicked for session:', sessionId);
-
         const confirmed = window.confirm('Êtes-vous sûr de vouloir annuler cette session ?');
-        console.log('✅ User confirmed:', confirmed);
-
         if (!confirmed) return;
 
         setCancellingId(sessionId);
 
         try {
-            console.log('📡 Calling cancelSession API...');
             const result = await cancelSession(sessionId, user.id);
 
-            console.log('📦 Cancel result:', result);
-
             if (result.error) {
-                console.error('❌ Cancel error:', result.error);
-                alert(`Erreur: ${result.error.message || 'Impossible d\'annuler la session'}`);
+                alert(`Erreur: ${result.error.message || 'Impossible d\\'annuler la session'}`);
                 return;
             }
 
-            console.log('✅ Session cancelled successfully, refreshing dashboard...');
-            await loadDashboard(); // Refresh dashboard
+            await loadDashboard();
         } catch (error) {
-            console.error('💥 Exception during cancel:', error);
-            alert('Erreur lors de l\'annulation. Veuillez réessayer.');
+            alert('Erreur lors de l\\'annulation.Veuillez réessayer.');
         } finally {
             setCancellingId(null);
         }
@@ -108,49 +93,73 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Chargement...</p>
+                    <div className="relative">
+                        <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-200 border-t-transparent mx-auto mb-6"></div>
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 opacity-20 blur-xl animate-pulse"></div>
+                    </div>
+                    <p className="text-gray-700 font-semibold text-lg">Chargement de votre espace...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-primary-100">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-3">
-                        <Image
-                            src="/logo (1)FITBUDDY.png"
-                            alt="Fitbuddy"
-                            width={150}
-                            height={50}
-                            className="h-12 w-auto"
-                        />
-                    </Link>
-                    <div className="flex items-center gap-6">
-                        <Link href="/dashboard" className="text-sm font-semibold text-primary-600">
-                            Dashboard
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+            {/* Header moderne */}
+            <header className="bg-white/80 backdrop-blur-xl shadow-lg border-b border-purple-100/50 sticky top-0 z-50">
+                <div className="container mx-auto px-6 py-5">
+                    <div className="flex items-center justify-between">
+                        <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+                            <Image
+                                src="/logo (1)FITBUDDY.png"
+                                alt="Fitbuddy"
+                                width={150}
+                                height={50}
+                                className="h-12 w-auto transition-transform group-hover:scale-105"
+                            />
                         </Link>
-                        <Link href="/dashboard/sessions" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                            Mes sessions
-                        </Link>
-                        <Link href="/dashboard/book/recurring" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                            📅 Sessions récurrentes
-                        </Link>
-                        <Link href="/dashboard/settings" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                            ⚙️ Paramètres
-                        </Link>
-                        <div className="flex items-center gap-4 border-l border-gray-300 pl-6">
-                            <span className="text-gray-700">
-                                Bonjour, <span className="font-semibold">{profile?.first_name || 'Client'}</span> !
-                            </span>
+
+                        <nav className="hidden md:flex items-center gap-2">
+                            <Link
+                                href="/dashboard"
+                                className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                            >
+                                🏠 Dashboard
+                            </Link>
+                            <Link
+                                href="/dashboard/sessions"
+                                className="px-4 py-2 rounded-full text-gray-700 hover:bg-white/80 font-medium text-sm transition-all hover:scale-105"
+                            >
+                                📖 Sessions
+                            </Link>
+                            <Link
+                                href="/dashboard/book/recurring"
+                                className="px-4 py-2 rounded-full text-gray-700 hover:bg-white/80 font-medium text-sm transition-all hover:scale-105"
+                            >
+                                🔄 Récurrentes
+                            </Link>
+                            <Link
+                                href="/dashboard/settings"
+                                className="px-4 py-2 rounded-full text-gray-700 hover:bg-white/80 font-medium text-sm transition-all hover:scale-105"
+                            >
+                                ⚙️ Paramètres
+                            </Link>
+                        </nav>
+
+                        <div className="flex items-center gap-4">
+                            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                    {profile?.first_name?.charAt(0) || 'C'}
+                                </div>
+                                <span className="font-semibold text-gray-800">
+                                    {profile?.first_name || 'Client'}
+                                </span>
+                            </div>
                             <button
                                 onClick={handleLogout}
-                                className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium transition-all hover:bg-gray-100 rounded-full"
                             >
                                 Déconnexion
                             </button>
@@ -160,15 +169,20 @@ export default function DashboardPage() {
             </header>
 
             {/* Main Content */}
-            <main className="container mx-auto px-4 py-10">
-                <div className="max-w-4xl mx-auto">
-                    {/* Welcome */}
-                    <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                        Tableau de bord
-                    </h1>
+            <main className="container mx-auto px-6 py-12">
+                <div className="max-w-6xl mx-auto">
+                    {/* Welcome Section avec effet glassmorphism */}
+                    <div className="mb-10 bg-white/40 backdrop-blur-md rounded-3xl p-8 border border-white/50 shadow-2xl">
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-3 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                            Bienvenue, {profile?.first_name || 'Champion'} ! 👋
+                        </h1>
+                        <p className="text-gray-600 text-lg">
+                            Prêt à continuer votre transformation ? Voici votre espace personnalisé.
+                        </p>
+                    </div>
 
-                    {/* Package Card or Program Selector */}
-                    <div className="mb-8">
+                    {/* Package Card ou Program Selector */}
+                    <div className="mb-10">
                         {activePackage ? (
                             <PackageCard package={activePackage} loading={loading} />
                         ) : (
@@ -176,65 +190,90 @@ export default function DashboardPage() {
                         )}
                     </div>
 
-                    {/* Next Session */}
+                    {/* Next Session avec style premium */}
                     {nextSession && (
-                        <div className="mb-8">
-                            <h2 className="text-xl font-bold text-gray-900 mb-4">📅 Prochaine session</h2>
-                            <SessionCard session={nextSession} onCancel={handleCancel} cancelling={cancellingId === nextSession.id} />
+                        <div className="mb-10">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-3">
+                                <span className="text-3xl">🎯</span>
+                                Prochaine session
+                            </h2>
+                            <SessionCard
+                                session={nextSession}
+                                onCancel={handleCancel}
+                                cancelling={cancellingId === nextSession.id}
+                            />
                         </div>
                     )}
 
-                    {/* Quick Actions */}
-                    <div className="grid md:grid-cols-2 gap-4 mb-8">
+                    {/* Quick Actions avec animations */}
+                    <div className="grid md:grid-cols-2 gap-6 mb-10">
                         <Link
                             href="/dashboard/book"
-                            className="bg-gradient-fitbuddy text-white p-6 rounded-xl hover:scale-105 transition-all shadow-lg group"
+                            className="group relative bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-8 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
                         >
-                            <div className="text-4xl mb-2">📅</div>
-                            <h3 className="text-lg font-bold mb-1">Réserver une session</h3>
-                            <p className="text-white/90 text-sm">Planifiez votre prochain coaching</p>
+                            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                            <div className="relative z-10">
+                                <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📅</div>
+                                <h3 className="text-2xl font-bold text-white mb-2">Réserver une session</h3>
+                                <p className="text-white/90">Planifiez votre prochain coaching maintenant</p>
+                            </div>
                         </Link>
 
                         <Link
                             href="/dashboard/sessions"
-                            className="bg-white border-2 border-primary-200 p-6 rounded-xl hover:border-primary-400 hover:shadow-lg transition-all group"
+                            className="group relative bg-white p-8 rounded-3xl border-2 border-purple-200 hover:border-purple-400 hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
                         >
-                            <div className="text-4xl mb-2">📖</div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">Historique complet</h3>
-                            <p className="text-gray-600 text-sm">Voir toutes vos sessions</p>
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                            <div className="relative z-10">
+                                <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📚</div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">Historique complet</h3>
+                                <p className="text-gray-600">Consultez toutes vos sessions passées</p>
+                            </div>
                         </Link>
                     </div>
 
                     {/* Recent Sessions */}
                     {recentSessions.length > 0 && (
                         <div>
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl font-bold text-gray-900">Sessions récentes</h2>
-                                <Link href="/dashboard/sessions" className="text-sm text-primary-600 hover:text-primary-700 font-semibold">
-                                    Voir tout →
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                                    <span className="text-3xl">⏱️</span>
+                                    Sessions récentes
+                                </h2>
+                                <Link
+                                    href="/dashboard/sessions"
+                                    className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2 group"
+                                >
+                                    Voir tout
+                                    <span className="transform group-hover:translate-x-1 transition-transform">→</span>
                                 </Link>
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {recentSessions.map((session) => (
-                                    <SessionCard key={session.id} session={session} onCancel={handleCancel} cancelling={cancellingId === session.id} />
+                                    <SessionCard
+                                        key={session.id}
+                                        session={session}
+                                        onCancel={handleCancel}
+                                        cancelling={cancellingId === session.id}
+                                    />
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {/* No sessions */}
+                    {/* No sessions avec design engageant */}
                     {recentSessions.length === 0 && !nextSession && (
-                        <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
-                            <div className="text-6xl mb-4">📅</div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune session programmée</h3>
-                            <p className="text-gray-600 mb-4">
-                                Réservez votre première session pour commencer votre transformation !
+                        <div className="bg-gradient-to-br from-white to-purple-50 rounded-3xl p-12 text-center border-2 border-purple-100 shadow-xl">
+                            <div className="text-8xl mb-6 animate-bounce">🚀</div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3">C'est le moment de commencer !</h3>
+                            <p className="text-gray-600 mb-6 text-lg max-w-md mx-auto">
+                                Réservez votre première session et démarrez votre transformation dès aujourd'hui.
                             </p>
                             <Link
                                 href="/dashboard/book"
-                                className="inline-block bg-gradient-fitbuddy text-white font-semibold px-6 py-3 rounded-lg hover:scale-105 transition-all"
+                                className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-8 py-4 rounded-full hover:shadow-2xl transition-all duration-300 hover:scale-110"
                             >
-                                Réserver maintenant
+                                Réserver maintenant ✨
                             </Link>
                         </div>
                     )}
