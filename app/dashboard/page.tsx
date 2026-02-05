@@ -85,7 +85,7 @@ export default function DashboardPage() {
 
             await loadDashboard();
         } catch (error) {
-            alert('Erreur lors de l'annulation. Veuillez réessayer.');
+            alert('Erreur lors de la suppression. Veuillez reessayer.');
         } finally {
             setCancellingId(null);
         }
