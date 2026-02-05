@@ -21,9 +21,16 @@ export default function DashboardPage() {
     const [recentSessions, setRecentSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [cancellingId, setCancellingId] = useState<string | null>(null);
+    const [showWhatsAppBanner, setShowWhatsAppBanner] = useState(false);
+    const [bannerDismissed, setBannerDismissed] = useState(false);
 
     useEffect(() => {
         loadDashboard();
+        // Check if banner was previously dismissed in this session
+        const dismissed = sessionStorage.getItem('whatsapp_banner_dismissed');
+        if (dismissed) {
+            setBannerDismissed(true);
+        }
     }, []);
 
     const loadDashboard = async () => {
@@ -44,6 +51,15 @@ export default function DashboardPage() {
                 .single();
 
             setProfile(profileData);
+
+            // Check if user needs to add WhatsApp number
+            // Show banner if: no phone number OR if user is OAuth (has provider metadata)
+            const isOAuthUser = user.app_metadata?.provider === 'google' || user.user_metadata?.iss?.includes('google');
+            const hasNoPhone = !profileData?.phone || profileData.phone.trim() === '';
+
+            if (hasNoPhone) {
+                setShowWhatsAppBanner(true);
+            }
 
             const { data: packageData } = await getActivePackage(user.id);
             setActivePackage(packageData);
@@ -168,116 +184,167 @@ export default function DashboardPage() {
                 </div>
             </header>
 
-            {/* Main Content */}
-            <main className="container mx-auto px-6 py-12">
-                <div className="max-w-6xl mx-auto">
-                    {/* Welcome Section avec effet glassmorphism */}
-                    <div className="mb-10 bg-white/40 backdrop-blur-md rounded-3xl p-8 border border-white/50 shadow-2xl">
-                        <h1 className="text-4xl md:text-5xl font-extrabold mb-3 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-                            Bienvenue, {profile?.first_name || 'Champion'} ! 👋
-                        </h1>
-                        <p className="text-gray-600 text-lg">
-                            Prêt à continuer votre transformation ? Voici votre espace personnalisé.
-                        </p>
-                    </div>
+            {/* WhatsApp Notification Banner */}
+            {showWhatsAppBanner && !bannerDismissed && (
+                <div className="container mx-auto px-6 py-4">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl p-6 shadow-2xl border-2 border-white/50 relative overflow-hidden">
+                        {/* Background decoration */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
 
-                    {/* Package Card ou Program Selector */}
-                    <div className="mb-10">
-                        {activePackage ? (
-                            <PackageCard package={activePackage} loading={loading} />
-                        ) : (
-                            <ProgramSelector />
-                        )}
-                    </div>
-
-                    {/* Next Session avec style premium */}
-                    {nextSession && (
-                        <div className="mb-10">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-3">
-                                <span className="text-3xl">🎯</span>
-                                Prochaine session
-                            </h2>
-                            <SessionCard
-                                session={nextSession}
-                                onCancel={handleCancel}
-                                cancelling={cancellingId === nextSession.id}
-                            />
-                        </div>
-                    )}
-
-                    {/* Quick Actions avec animations */}
-                    <div className="grid md:grid-cols-2 gap-6 mb-10">
-                        <Link
-                            href="/dashboard/book"
-                            className="group relative bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-8 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                            <div className="relative z-10">
-                                <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📅</div>
-                                <h3 className="text-2xl font-bold text-white mb-2">Réserver une session</h3>
-                                <p className="text-white/90">Planifiez votre prochain coaching maintenant</p>
+                        <div className="relative flex items-start gap-4">
+                            <div className="text-5xl animate-bounce">📱</div>
+                            <div className="flex-1">
+                                <h3 className="text-xl font-bold text-white mb-2">
+                                    Ajoutez votre numéro WhatsApp !
+                                </h3>
+                                <p className="text-white/90 mb-4 text-sm leading-relaxed">
+                                    Pour recevoir automatiquement les liens Google Meet de vos sessions de coaching par WhatsApp,
+                                    veuillez ajouter votre numéro dans vos paramètres.
+                                </p>
+                                <div className="flex flex-wrap gap-3">
+                                    <Link
+                                        href="/dashboard/settings"
+                                        className="bg-white text-green-600 font-bold px-6 py-3 rounded-full hover:shadow-xl transition-all hover:scale-105 inline-flex items-center gap-2"
+                                    >
+                                        ⚙️ Aller aux paramètres
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            setBannerDismissed(true);
+                                            sessionStorage.setItem('whatsapp_banner_dismissed', 'true');
+                                        }}
+                                        className="bg-white/20 text-white font-semibold px-6 py-3 rounded-full hover:bg-white/30 transition-all"
+                                    >
+                                        Plus tard
+                                    </button>
+                                </div>
                             </div>
-                        </Link>
-
-                        <Link
-                            href="/dashboard/sessions"
-                            className="group relative bg-white p-8 rounded-3xl border-2 border-purple-200 hover:border-purple-400 hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                            <div className="relative z-10">
-                                <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📚</div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">Historique complet</h3>
-                                <p className="text-gray-600">Consultez toutes vos sessions passées</p>
-                            </div>
-                        </Link>
-                    </div>
-
-                    {/* Recent Sessions */}
-                    {recentSessions.length > 0 && (
-                        <div>
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                                    <span className="text-3xl">⏱️</span>
-                                    Sessions récentes
-                                </h2>
-                                <Link
-                                    href="/dashboard/sessions"
-                                    className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2 group"
-                                >
-                                    Voir tout
-                                    <span className="transform group-hover:translate-x-1 transition-transform">→</span>
-                                </Link>
-                            </div>
-                            <div className="space-y-4">
-                                {recentSessions.map((session) => (
-                                    <SessionCard
-                                        key={session.id}
-                                        session={session}
-                                        onCancel={handleCancel}
-                                        cancelling={cancellingId === session.id}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* No sessions avec design engageant */}
-                    {recentSessions.length === 0 && !nextSession && (
-                        <div className="bg-gradient-to-br from-white to-purple-50 rounded-3xl p-12 text-center border-2 border-purple-100 shadow-xl">
-                            <div className="text-8xl mb-6 animate-bounce">🚀</div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-3">C'est le moment de commencer !</h3>
-                            <p className="text-gray-600 mb-6 text-lg max-w-md mx-auto">
-                                Réservez votre première session et démarrez votre transformation dès aujourd'hui.
-                            </p>
-                            <Link
-                                href="/dashboard/book"
-                                className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-8 py-4 rounded-full hover:shadow-2xl transition-all duration-300 hover:scale-110"
+                            <button
+                                onClick={() => {
+                                    setBannerDismissed(true);
+                                    sessionStorage.setItem('whatsapp_banner_dismissed', 'true');
+                                }}
+                                className="text-white/80 hover:text-white transition-colors text-2xl leading-none"
                             >
-                                Réserver maintenant ✨
-                            </Link>
+                                ×
+                            </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Main Content */}
+            <main className="container mx-auto px-6 py-10">
+                {/* Welcome Section */}
+                <div className="mb-10 bg-white/40 backdrop-blur-md rounded-3xl p-8 border border-white/50 shadow-2xl">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                                Bienvenue {profile?.first_name || 'Client'} ! 👋
+                            </h1>
+                            <p className="text-gray-600 text-lg">
+                                Prêt à continuer votre transformation ? Voici votre espace personnalisé.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Package Card ou Program Selector */}
+                <div className="mb-10">
+                    {activePackage ? (
+                        <PackageCard package={activePackage} loading={loading} />
+                    ) : (
+                        <ProgramSelector />
                     )}
                 </div>
+
+                {/* Next Session avec style premium */}
+                {nextSession && (
+                    <div className="mb-10">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-3">
+                            <span className="text-3xl">🎯</span>
+                            Prochaine session
+                        </h2>
+                        <SessionCard
+                            session={nextSession}
+                            onCancel={handleCancel}
+                            cancelling={cancellingId === nextSession.id}
+                        />
+                    </div>
+                )}
+
+                {/* Quick Actions avec animations */}
+                <div className="grid md:grid-cols-2 gap-6 mb-10">
+                    <Link
+                        href="/dashboard/book"
+                        className="group relative bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-8 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <div className="relative z-10">
+                            <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📅</div>
+                            <h3 className="text-2xl font-bold text-white mb-2">Réserver une session</h3>
+                            <p className="text-white/90">Planifiez votre prochain coaching maintenant</p>
+                        </div>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/sessions"
+                        className="group relative bg-white p-8 rounded-3xl border-2 border-purple-200 hover:border-purple-400 hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <div className="relative z-10">
+                            <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📚</div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Historique complet</h3>
+                            <p className="text-gray-600">Consultez toutes vos sessions passées</p>
+                        </div>
+                    </Link>
+                </div>
+
+                {/* Recent Sessions */}
+                {recentSessions.length > 0 && (
+                    <div>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                                <span className="text-3xl">⏱️</span>
+                                Sessions récentes
+                            </h2>
+                            <Link
+                                href="/dashboard/sessions"
+                                className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2 group"
+                            >
+                                Voir tout
+                                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                            </Link>
+                        </div>
+                        <div className="space-y-4">
+                            {recentSessions.map((session) => (
+                                <SessionCard
+                                    key={session.id}
+                                    session={session}
+                                    onCancel={handleCancel}
+                                    cancelling={cancellingId === session.id}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* No sessions avec design engageant */}
+                {recentSessions.length === 0 && !nextSession && (
+                    <div className="bg-gradient-to-br from-white to-purple-50 rounded-3xl p-12 text-center border-2 border-purple-100 shadow-xl">
+                        <div className="text-8xl mb-6 animate-bounce">🚀</div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-3">C'est le moment de commencer !</h3>
+                        <p className="text-gray-600 mb-6 text-lg max-w-md mx-auto">
+                            Réservez votre première session et démarrez votre transformation dès aujourd'hui.
+                        </p>
+                        <Link
+                            href="/dashboard/book"
+                            className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-8 py-4 rounded-full hover:shadow-2xl transition-all duration-300 hover:scale-110"
+                        >
+                            Réserver maintenant ✨
+                        </Link>
+                    </div>
+                )}
             </main>
         </div>
     );
