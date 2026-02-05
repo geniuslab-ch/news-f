@@ -27,14 +27,23 @@ export async function POST(request: NextRequest) {
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
+        // Try to get email from profiles first
         const { data: profile } = await supabase
             .from('profiles')
             .select('email')
             .eq('id', userId)
             .single();
 
-        const userEmail = profile?.email || undefined;
-        console.log('📧 User email:', userEmail);
+        let userEmail = profile?.email;
+
+        // If not in profiles, get from auth.users (for OAuth users)
+        if (!userEmail) {
+            const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+            userEmail = user?.email;
+            console.log('📧 Email from auth.users:', userEmail);
+        } else {
+            console.log('📧 Email from profiles:', userEmail);
+        }
 
         const product = getProduct(packageType);
         const origin = request.headers.get('origin') || 'https://news-f-phi.vercel.app';

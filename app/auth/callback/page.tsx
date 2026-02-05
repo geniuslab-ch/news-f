@@ -38,7 +38,10 @@ export default function AuthCallbackPage() {
                 console.log('➡️ No role found, defaulting to client');
                 await supabase
                     .from('profiles')
-                    .update({ role: 'client' })
+                    .update({
+                        role: 'client',
+                        email: session.user.email // Store email for checkout
+                    })
                     .eq('id', session.user.id);
 
                 router.push('/dashboard');
