@@ -8,6 +8,7 @@ import { getUserSessions, cancelSession } from '@/lib/supabase-helpers';
 import type { User } from '@supabase/supabase-js';
 import type { Session } from '@/lib/supabase-helpers';
 import SessionCard from '@/components/dashboard/SessionCard';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function SessionsPage() {
     const router = useRouter();
@@ -45,129 +46,105 @@ export default function SessionsPage() {
     const handleCancel = async (sessionId: string) => {
         if (!user) return;
 
-        console.log('🔴 Cancel clicked for session:', sessionId);
-
         const confirmed = window.confirm('Êtes-vous sûr de vouloir annuler cette session ?');
-        console.log('✅ User confirmed:', confirmed);
-
         if (!confirmed) return;
 
         setCancellingId(sessionId);
 
         try {
-            console.log('📡 Calling cancelSession API...');
             const result = await cancelSession(sessionId, user.id);
 
-            console.log('📦 Cancel result:', result);
-
             if (result.error) {
-                console.error('❌ Cancel error:', result.error);
                 alert(`Erreur: ${result.error.message || 'Impossible d\'annuler la session'}`);
                 return;
             }
 
-            console.log('✅ Session cancelled successfully, refreshing sessions...');
-            await loadSessions(); // Refresh list
+            await loadSessions();
         } catch (error) {
-            console.error('💥 Exception during cancel:', error);
-            alert('Erreur lors de l\'annulation. Veuillez réessayer.');
+            alert('Erreur lors de la suppression. Veuillez reessayer.');
         } finally {
             setCancellingId(null);
         }
     };
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.push('/login');
-    };
-
     const upcomingSessions = sessions.filter(s => new Date(s.session_date) >= new Date());
     const pastSessions = sessions.filter(s => new Date(s.session_date) < new Date());
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-primary-100">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="text-2xl font-bold text-gradient">
-                        Fitbuddy
-                    </Link>
-                    <div className="flex items-center gap-6">
-                        <Link href="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                            Dashboard
-                        </Link>
-                        <Link href="/dashboard/sessions" className="text-sm font-semibold text-primary-600">
-                            Mes sessions
-                        </Link>
-                        <div className="flex items-center gap-4 border-l border-gray-300 pl-6">
-                            <button
-                                onClick={handleLogout}
-                                className="text-sm text-gray-600 hover:text-gray-900 font-medium"
-                            >
-                                Déconnexion
-                            </button>
-                        </div>
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="relative">
+                        <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-200 border-t-transparent mx-auto mb-6"></div>
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 opacity-20 blur-xl animate-pulse"></div>
                     </div>
+                    <p className="text-gray-700 font-semibold text-lg">Chargement...</p>
                 </div>
-            </header>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+            <DashboardHeader />
 
             {/* Main Content */}
-            <main className="container mx-auto px-4 py-10">
+            <main className="container mx-auto px-6 py-12">
                 <div className="max-w-4xl mx-auto">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            📖 Historique des sessions
-                        </h1>
-                        <Link
-                            href="/dashboard/book"
-                            className="bg-gradient-fitbuddy text-white font-semibold px-6 py-3 rounded-lg hover:scale-105 transition-all"
-                        >
-                            + Réserver
-                        </Link>
+                    {/* Welcome Section */}
+                    <div className="mb-10 bg-white/40 backdrop-blur-md rounded-3xl p-8 border border-white/50 shadow-2xl">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-4xl font-extrabold mb-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                                    📖 Mes Sessions
+                                </h1>
+                                <p className="text-gray-600 text-lg">
+                                    Consultez et gérez toutes vos sessions de coaching
+                                </p>
+                            </div>
+                            <Link
+                                href="/dashboard/book"
+                                className="hidden md:flex bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-6 py-3 rounded-full hover:shadow-2xl transition-all duration-300 hover:scale-110"
+                            >
+                                + Nouvelle session
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Filters */}
-                    <div className="flex gap-2 mb-6">
+                    <div className="flex gap-3 mb-8 flex-wrap">
                         <button
                             onClick={() => setFilter('all')}
-                            className={`px-4 py-2 rounded-lg font-semibold transition ${filter === 'all'
-                                ? 'bg-gradient-fitbuddy text-white'
-                                : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
+                            className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${filter === 'all'
+                                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-xl scale-105'
+                                    : 'bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:scale-105'
                                 }`}
                         >
                             Toutes ({sessions.length})
                         </button>
                         <button
                             onClick={() => setFilter('upcoming')}
-                            className={`px-4 py-2 rounded-lg font-semibold transition ${filter === 'upcoming'
-                                ? 'bg-gradient-fitbuddy text-white'
-                                : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
+                            className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${filter === 'upcoming'
+                                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-xl scale-105'
+                                    : 'bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:scale-105'
                                 }`}
                         >
                             À venir ({upcomingSessions.length})
                         </button>
                         <button
                             onClick={() => setFilter('past')}
-                            className={`px-4 py-2 rounded-lg font-semibold transition ${filter === 'past'
-                                ? 'bg-gradient-fitbuddy text-white'
-                                : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400'
+                            className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${filter === 'past'
+                                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-xl scale-105'
+                                    : 'bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:scale-105'
                                 }`}
                         >
                             Passées ({pastSessions.length})
                         </button>
                     </div>
 
-                    {/* Loading */}
-                    {loading && (
-                        <div className="text-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary-600 mx-auto"></div>
-                        </div>
-                    )}
-
                     {/* Sessions List */}
-                    {!loading && sessions.length > 0 && (
-                        <div className="space-y-3">
+                    {sessions.length > 0 && (
+                        <div className="space-y-4">
                             {sessions.map((session) => (
                                 <SessionCard
                                     key={session.id}
@@ -180,15 +157,15 @@ export default function SessionsPage() {
                     )}
 
                     {/* No sessions */}
-                    {!loading && sessions.length === 0 && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
-                            <div className="text-6xl mb-4">📅</div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {sessions.length === 0 && (
+                        <div className="bg-gradient-to-br from-white to-purple-50 rounded-3xl p-12 text-center border-2 border-purple-100 shadow-xl">
+                            <div className="text-8xl mb-6 animate-bounce">📅</div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3">
                                 {filter === 'all' && 'Aucune session'}
                                 {filter === 'upcoming' && 'Aucune session à venir'}
                                 {filter === 'past' && 'Aucune session passée'}
                             </h3>
-                            <p className="text-gray-600 mb-6">
+                            <p className="text-gray-600 mb-6 text-lg max-w-md mx-auto">
                                 {filter === 'all' && 'Réservez votre première session pour commencer !'}
                                 {filter === 'upcoming' && 'Réservez une session pour continuer votre progression.'}
                                 {filter === 'past' && 'Vos sessions passées apparaîtront ici.'}
@@ -196,9 +173,9 @@ export default function SessionsPage() {
                             {filter !== 'past' && (
                                 <Link
                                     href="/dashboard/book"
-                                    className="inline-block bg-gradient-fitbuddy text-white font-semibold px-6 py-3 rounded-lg hover:scale-105 transition-all"
+                                    className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-8 py-4 rounded-full hover:shadow-2xl transition-all duration-300 hover:scale-110"
                                 >
-                                    Réserver une session
+                                    Réserver une session ✨
                                 </Link>
                             )}
                         </div>
