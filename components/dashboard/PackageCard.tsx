@@ -1,5 +1,9 @@
+'use client';
+
+import { useState } from 'react';
 import type { Package } from '@/lib/supabase-helpers';
 import { getPackageDetails, formatDate } from '@/lib/supabase-helpers';
+import { supabase } from '@/lib/supabase';
 
 interface PackageCardProps {
     package: Package | null;
@@ -7,6 +11,50 @@ interface PackageCardProps {
 }
 
 export default function PackageCard({ package: pkg, loading }: PackageCardProps) {
+    const [loadingPortal, setLoadingPortal] = useState(false);
+
+    const handleManageSubscription = async () => {
+        if (!pkg) return;
+
+        setLoadingPortal(true);
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                alert('Vous devez être connecté');
+                return;
+            }
+
+            const response = await fetch('/api/stripe/customer-portal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: user.id,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert(`Erreur: ${data.error}`);
+                return;
+            }
+
+            // Redirect to Stripe customer portal
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch (error) {
+            console.error('Error opening customer portal:', error);
+            alert('Erreur lors de l\'ouverture du portail client');
+        } finally {
+            setLoadingPortal(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="bg-white rounded-xl p-6 shadow-lg border border-primary-100 animate-pulse">
@@ -88,6 +136,31 @@ export default function PackageCard({ package: pkg, loading }: PackageCardProps)
                 <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-3">
                     <p className="text-sm text-orange-800">
                         ⚠️ Votre forfait expire bientôt. Pensez à le renouveler pour continuer votre progression !
+                    </p>
+                </div>
+            )}
+
+            {/* Manage Subscription Button */}
+            {pkg.stripe_subscription_id && (
+                <div className="mt-4 pt-4 border-t border-primary-200">
+                    <button
+                        onClick={handleManageSubscription}
+                        disabled={loadingPortal}
+                        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        {loadingPortal ? (
+                            <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+                                Chargement...
+                            </>
+                        ) : (
+                            <>
+                                ⚙️ Gérer mon abonnement
+                            </>
+                        )}
+                    </button>
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                        Annuler, modifier le paiement ou télécharger vos factures
                     </p>
                 </div>
             )}

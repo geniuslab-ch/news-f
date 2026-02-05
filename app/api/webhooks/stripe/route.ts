@@ -43,12 +43,25 @@ export async function POST(request: NextRequest) {
             const session = event.data.object as Stripe.Checkout.Session;
 
             console.log('✅ Checkout session completed:', session.id);
-            console.log('Metadata:', session.metadata);
+            console.log('Session subscription:', session.subscription);
 
-            const { userId, packageType, sessions, duration } = session.metadata || {};
+            // For subscription mode, retrieve the subscription to get metadata
+            if (!session.subscription) {
+                console.error('❌ No subscription found in session');
+                return NextResponse.json({ error: 'No subscription' }, { status: 400 });
+            }
+
+            // Retrieve the subscription to get metadata
+            const subscription = await stripe.subscriptions.retrieve(
+                session.subscription as string
+            );
+
+            console.log('📦 Subscription metadata:', subscription.metadata);
+
+            const { userId, packageType, sessions, duration } = subscription.metadata || {};
 
             if (!userId || !packageType) {
-                console.error('❌ Missing metadata in session');
+                console.error('❌ Missing metadata in subscription');
                 return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
             }
 
@@ -66,10 +79,11 @@ export async function POST(request: NextRequest) {
                 package_type: packageType,
                 total_sessions: parseInt(sessions || '8'),
                 sessions_used: 0,
+                sessions_remaining: parseInt(sessions || '8'),
                 start_date: startDate.toISOString().split('T')[0],
                 end_date: endDate.toISOString().split('T')[0],
                 status: 'active',
-                stripe_payment_intent: session.payment_intent as string,
+                stripe_subscription_id: subscription.id,
                 price_chf: priceChf,
                 amount_paid_cents: amountTotal,
             };
@@ -91,6 +105,30 @@ export async function POST(request: NextRequest) {
             }
 
             console.log('✅ Package created successfully:', data);
+
+            break;
+        }
+
+        case 'customer.subscription.deleted': {
+            const subscription = event.data.object as Stripe.Subscription;
+
+            console.log('🔴 Subscription cancelled:', subscription.id);
+
+            // Update package status to cancelled
+            const { error } = await supabaseAdmin
+                .from('packages')
+                .update({ status: 'cancelled' })
+                .eq('stripe_subscription_id', subscription.id);
+
+            if (error) {
+                console.error('❌ Error updating package status:', error);
+                return NextResponse.json(
+                    { error: 'Database error' },
+                    { status: 500 }
+                );
+            }
+
+            console.log('✅ Package status updated to cancelled');
 
             break;
         }
