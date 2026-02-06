@@ -141,6 +141,20 @@ async function handleBookingCreated(booking: CalComBooking, supabaseAdmin: Supab
     const end = new Date(booking.endTime);
     const durationMinutes = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
 
+    // Extract Google Meet Link correctly
+    // Cal.com sends the actual link in metadata.videoCallUrl for Google Meet integrations
+    let meetingLink = booking.metadata?.videoCallUrl;
+
+    // Fallback: Check if location is a URL (e.g. custom link)
+    if (!meetingLink && typeof booking.responses?.location === 'string' && booking.responses.location.startsWith('http')) {
+        meetingLink = booking.responses.location;
+    }
+
+    // If we still have object/JSON in location, do NOT save it as the link
+    if (!meetingLink) {
+        console.log('⚠️ No direct meeting link found in metadata or location');
+    }
+
     // Create session
     const sessionData = {
         user_id: user.id,
@@ -151,7 +165,8 @@ async function handleBookingCreated(booking: CalComBooking, supabaseAdmin: Supab
         duration_minutes: durationMinutes,
         status: 'scheduled' as const,
         calcom_booking_id: booking.uid,
-        meeting_link: booking.responses?.location || null,
+        meeting_link: meetingLink || null,
+        google_meet_link: meetingLink && meetingLink.includes('meet.google') ? meetingLink : null
     };
 
     console.log('📦 Creating session:', sessionData);
