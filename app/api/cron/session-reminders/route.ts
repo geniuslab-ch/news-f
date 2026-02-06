@@ -89,40 +89,48 @@ export async function GET() {
                 continue;
             }
 
-            // Robust date cleaning + parsing
-            let dateStr = session.session_date;
-            // If date is "YYYY-MM-DDT00:00:00", take just the date part
-            if (dateStr && dateStr.includes('T')) {
-                dateStr = dateStr.split('T')[0];
-            }
+            let hoursUntil = -999;
 
-            let timeStr = session.scheduled_time || '10:00:00';
-            // Ensure time is HH:MM:SS
-            if (timeStr.length === 5) timeStr += ':00';
+            try {
+                // Robust date cleaning + parsing
+                let dateStr = session.session_date;
+                if (!dateStr) throw new Error('No session_date');
 
-            const dateTimeString = `${dateStr}T${timeStr}`;
-            const sessionDateTime = new Date(dateTimeString);
+                // If date is "YYYY-MM-DDT00:00:00", take just the date part
+                if (dateStr.includes('T')) {
+                    dateStr = dateStr.split('T')[0];
+                }
 
-            // Check if date is valid
-            if (isNaN(sessionDateTime.getTime())) {
-                console.error(`❌ Invalid date: ${dateTimeString} for session ${session.id}`);
-                logEntry.error = `Invalid date format: ${dateTimeString}`;
+                let timeStr = session.scheduled_time || '10:00:00';
+                // Ensure time is HH:MM:SS
+                if (timeStr.length === 5) timeStr += ':00';
+
+                const dateTimeString = `${dateStr}T${timeStr}`;
+                const sessionDateTime = new Date(dateTimeString);
+
+                // Check if date is valid
+                if (isNaN(sessionDateTime.getTime())) {
+                    throw new Error(`Invalid date object created from ${dateTimeString}`);
+                }
+
+                hoursUntil = (sessionDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+                logEntry.sessionTime = sessionDateTime.toISOString();
+                logEntry.dateTimeString = dateTimeString;
+                logEntry.currentTime = now.toISOString();
+                logEntry.hoursUntil = hoursUntil;
+                logEntry.window = '0.5 to 24 hours';
+                logEntry.profile = { phone: profile.phone, lang: profile.language };
+
+                console.log(`📍 Session ${session.id}: ${dateTimeString} (in ${hoursUntil.toFixed(1)}h)`);
+            } catch (dateError: any) {
+                console.error(`❌ Date error for session ${session.id}:`, dateError);
+                logEntry.error = `Date error: ${dateError.message}`;
                 logEntry.rawDate = session.session_date;
                 logEntry.rawTime = session.scheduled_time;
                 debugLogs.push(logEntry);
                 continue;
             }
-
-            const hoursUntil = (sessionDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-            logEntry.sessionTime = sessionDateTime.toISOString();
-            logEntry.dateTimeString = dateTimeString;
-            logEntry.currentTime = now.toISOString();
-            logEntry.hoursUntil = hoursUntil;
-            logEntry.window = '0.5 to 24 hours';
-            logEntry.profile = { phone: profile.phone, lang: profile.language };
-
-            console.log(`📍 Session ${session.id}: ${dateTimeString} (in ${hoursUntil.toFixed(1)}h)`);
 
             // Send reminder 30 minutes to 24 hours before
             if (hoursUntil >= 0.5 && hoursUntil <= 24) {
@@ -130,13 +138,18 @@ export async function GET() {
                 console.log(`🔗 Meeting link: ${meetingLink}`);
 
                 // Format friendly date (e.g. 06.02.2026)
-                const friendlyDate = new Date(dateStr).toLocaleDateString('fr-CH');
+                let friendlyDate = session.session_date;
+                try {
+                    friendlyDate = new Date(session.session_date).toLocaleDateString('fr-CH');
+                } catch (e) {
+                    console.error('Error formatting friendly date', e);
+                }
 
                 const result = await sendSessionReminder({
                     to: profile.phone,
                     clientName: profile.first_name || 'Client',
                     sessionDate: friendlyDate,
-                    sessionTime: timeStr.substring(0, 5),
+                    sessionTime: (session.scheduled_time || '10:00').substring(0, 5),
                     meetingLink,
                     language: profile.language || 'fr',
                 });
