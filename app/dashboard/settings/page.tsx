@@ -17,6 +17,7 @@ export default function SettingsPage() {
         last_name: '',
         email: '',
         phone: '',
+        language: 'fr' as 'fr' | 'en',
     });
 
     // Password form
@@ -43,7 +44,7 @@ export default function SettingsPage() {
 
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('first_name, last_name, phone, email')
+                .select('first_name, last_name, phone, email, language')
                 .eq('id', user.id)
                 .single();
 
@@ -54,6 +55,7 @@ export default function SettingsPage() {
                 last_name: profile?.last_name || '',
                 email: profile?.email || user.email || '',
                 phone: profile?.phone || '',
+                language: profile?.language || 'fr',
             });
         } catch (error) {
             console.error('Error loading profile:', error);
@@ -75,6 +77,7 @@ export default function SettingsPage() {
                 first_name: profileData.first_name,
                 last_name: profileData.last_name,
                 phone: profileData.phone,
+                language: profileData.language,
             });
 
             // Use UPSERT instead of UPDATE to handle missing profiles
@@ -86,6 +89,7 @@ export default function SettingsPage() {
                     last_name: profileData.last_name,
                     phone: profileData.phone,
                     email: profileData.email,
+                    language: profileData.language,
                     role: 'client', // Default role
                     updated_at: new Date().toISOString(),
                 }, {
@@ -108,7 +112,7 @@ export default function SettingsPage() {
             // Verify the update
             const { data: verifyData, error: verifyError } = await supabase
                 .from('profiles')
-                .select('first_name, last_name, phone')
+                .select('first_name, last_name, phone, language')
                 .eq('id', user.id)
                 .single();
 
@@ -129,6 +133,7 @@ export default function SettingsPage() {
                 first_name: verifyData.first_name || '',
                 last_name: verifyData.last_name || '',
                 phone: verifyData.phone || '',
+                language: verifyData.language || 'fr',
             });
 
             alert('✅ Profil mis à jour avec succès!');
@@ -265,6 +270,23 @@ export default function SettingsPage() {
                                     />
                                     <p className="text-xs text-gray-600 mt-2 bg-purple-50 p-3 rounded-xl border border-purple-100">
                                         💡 Ce numéro sera utilisé pour vous envoyer les liens Google Meet de vos sessions
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span className="text-xl">🌍</span> Langue / Language *
+                                    </label>
+                                    <select
+                                        value={profileData.language}
+                                        onChange={(e) => setProfileData({ ...profileData, language: e.target.value as 'fr' | 'en' })}
+                                        className="w-full px-4 py-3 border-2 border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
+                                    >
+                                        <option value="fr">🇫🇷 Français</option>
+                                        <option value="en">🇬🇧 English</option>
+                                    </select>
+                                    <p className="text-xs text-gray-600 mt-2 bg-blue-50 p-3 rounded-xl border border-blue-100">
+                                        💬 Langue utilisée pour les rappels WhatsApp de vos sessions
                                     </p>
                                 </div>
 
