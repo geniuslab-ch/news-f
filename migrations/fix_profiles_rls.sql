@@ -1,41 +1,61 @@
--- Fix RLS Policies for Profiles Table
--- This script ensures users can update their own profile
+-- Fix Infinite Recursion in Profiles RLS Policies
+-- This script removes problematic policies and creates simple, non-recursive ones
 
--- Drop existing policies if they exist
+-- STEP 1: Disable RLS temporarily to clean up
+ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
+
+-- STEP 2: Drop ALL existing policies
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+DROP POLICY IF EXISTS "Enable read access for all users" ON profiles;
+DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON profiles;
+DROP POLICY IF EXISTS "Enable update for users based on id" ON profiles;
+DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
 
--- Enable RLS on profiles table
+-- STEP 3: Re-enable RLS
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Policy: Users can view their own profile
-CREATE POLICY "Users can view own profile"
+-- STEP 4: Create SIMPLE policies without recursion
+
+-- Allow users to SELECT their own profile
+CREATE POLICY "profiles_select_own"
 ON profiles
 FOR SELECT
-USING (auth.uid() = id);
+TO authenticated
+USING (id = auth.uid());
 
--- Policy: Users can update their own profile
-CREATE POLICY "Users can update own profile"
+-- Allow users to UPDATE their own profile
+CREATE POLICY "profiles_update_own"
 ON profiles
 FOR UPDATE
-USING (auth.uid() = id)
-WITH CHECK (auth.uid() = id);
+TO authenticated
+USING (id = auth.uid())
+WITH CHECK (id = auth.uid());
 
--- Policy: Users can insert their own profile (for new users)
-CREATE POLICY "Users can insert own profile"
+-- Allow users to INSERT their own profile (for new signups)
+CREATE POLICY "profiles_insert_own"
 ON profiles
 FOR INSERT
-WITH CHECK (auth.uid() = id);
+TO authenticated
+WITH CHECK (id = auth.uid());
 
--- Verify policies
+-- STEP 5: Grant necessary permissions
+GRANT SELECT, UPDATE, INSERT ON profiles TO authenticated;
+
+-- STEP 6: Verify the policies
 SELECT 
-    schemaname, 
-    tablename, 
-    policyname, 
+    policyname,
     cmd,
-    qual as using_expression,
-    with_check as with_check_expression
+    CASE 
+        WHEN qual IS NOT NULL THEN pg_get_expr(qual, 'profiles'::regclass)
+        ELSE 'no condition'
+    END as using_clause,
+    CASE 
+        WHEN with_check IS NOT NULL THEN pg_get_expr(with_check, 'profiles'::regclass)
+        ELSE 'no condition'
+    END as with_check_clause
 FROM pg_policies
 WHERE tablename = 'profiles'
 ORDER BY policyname;
