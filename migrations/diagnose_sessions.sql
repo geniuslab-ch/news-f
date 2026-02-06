@@ -62,18 +62,6 @@ SELECT
 FROM profiles
 WHERE email = 'noura.scharer@gmail.com';
 
--- 6. Si AUCUNE session n'existe, vérifiez les metadata Cal.com
-SELECT 
-    id,
-    created_at,
-    metadata
-FROM sessions
-WHERE user_id IN (
-    SELECT id FROM profiles WHERE email = 'noura.scharer@gmail.com'
-)
-ORDER BY created_at DESC
-LIMIT 5;
-
 -- ========================================
 -- CORRECTIONS POSSIBLES
 -- ========================================
