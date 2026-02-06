@@ -30,7 +30,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100">
       {/* Global Navigation */}
       <GlobalNav />
 
@@ -38,7 +38,7 @@ export default function Home() {
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6">
             Bienvenue chez{' '}
-            <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-fitbuddy bg-clip-text text-transparent">
               Fitbuddy
             </span>
           </h1>
@@ -52,15 +52,18 @@ export default function Home() {
             <Link
               key={program.slug}
               href={`/${program.slug}`}
-              className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              className="group bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-primary-100 hover:border-primary-300 relative overflow-hidden"
             >
-              <div className={`w-16 h-16 bg-gradient-to-r ${program.color} rounded-xl mb-6 group-hover:scale-110 transition-transform`}></div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">{program.title}</h2>
-              <p className="text-gray-600 leading-relaxed mb-6">{program.description}</p>
-              <span className="inline-flex items-center gap-2 text-emerald-600 font-semibold group-hover:gap-4 transition-all">
-                En savoir plus
-                <span>→</span>
-              </span>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10">
+                <div className={`w-16 h-16 bg-gradient-to-r ${program.color} rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-md`}></div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">{program.title}</h2>
+                <p className="text-gray-600 leading-relaxed mb-6">{program.description}</p>
+                <span className="inline-flex items-center gap-2 text-primary-600 font-bold group-hover:gap-3 transition-all">
+                  En savoir plus
+                  <span className="text-xl">→</span>
+                </span>
+              </div>
             </Link>
           ))}
         </div>
