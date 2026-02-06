@@ -11,7 +11,7 @@ export default function Hero({ lang, ctaText, programSlug }: HeroProps) {
         : '/Website%20english%20video.webm';
 
     return (
-        <section className="relative min-h-screen flex items-end justify-center overflow-hidden bg-black">
+        <section className="relative min-h-[60vh] md:min-h-screen flex items-end justify-center overflow-hidden bg-black">
             {/* Video Background */}
             <div className="absolute inset-0 w-full h-full">
                 <video
@@ -20,7 +20,7 @@ export default function Hero({ lang, ctaText, programSlug }: HeroProps) {
                     loop
                     muted
                     playsInline
-                    className="w-full h-full object-cover md:object-cover"
+                    className="w-full h-full object-contain md:object-cover"
                     style={{ maxHeight: '100%', maxWidth: '100%', objectPosition: 'center' }}
                 >
                     <source src={videoSrc} type="video/webm" />
