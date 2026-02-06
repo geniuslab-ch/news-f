@@ -11,6 +11,7 @@ import type { Package, Session } from '@/lib/supabase-helpers';
 import PackageCard from '@/components/dashboard/PackageCard';
 import SessionCard from '@/components/dashboard/SessionCard';
 import ProgramSelector from '@/components/dashboard/ProgramSelector';
+import { getTranslation } from '@/lib/dashboard-translations';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -86,7 +87,10 @@ export default function DashboardPage() {
     const handleCancel = async (sessionId: string) => {
         if (!user) return;
 
-        const confirmed = window.confirm('Êtes-vous sûr de vouloir annuler cette session ?');
+        const t = getTranslation(profile?.language);
+        const confirmed = window.confirm(profile?.language === 'en'
+            ? 'Are you sure you want to cancel this session?'
+            : 'Êtes-vous sûr de vouloir annuler cette session ?');
         if (!confirmed) return;
 
         setCancellingId(sessionId);
@@ -107,6 +111,8 @@ export default function DashboardPage() {
         }
     };
 
+    const t = getTranslation(profile?.language);
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
@@ -115,7 +121,7 @@ export default function DashboardPage() {
                         <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-200 border-t-transparent mx-auto mb-6"></div>
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 opacity-20 blur-xl animate-pulse"></div>
                     </div>
-                    <p className="text-gray-700 font-semibold text-lg">Chargement de votre espace...</p>
+                    <p className="text-gray-700 font-semibold text-lg">{t.welcome.loading}</p>
                 </div>
             </div>
         );
@@ -142,25 +148,25 @@ export default function DashboardPage() {
                                 href="/dashboard"
                                 className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all hover:scale-105"
                             >
-                                🏠 Dashboard
+                                {t.nav.dashboard}
                             </Link>
                             <Link
                                 href="/dashboard/sessions"
                                 className="px-4 py-2 rounded-full text-gray-700 hover:bg-white/80 font-medium text-sm transition-all hover:scale-105"
                             >
-                                📖 Sessions
+                                {t.nav.sessions}
                             </Link>
                             <Link
                                 href="/dashboard/book/recurring"
                                 className="px-4 py-2 rounded-full text-gray-700 hover:bg-white/80 font-medium text-sm transition-all hover:scale-105"
                             >
-                                🔄 Récurrentes
+                                {t.nav.recurring}
                             </Link>
                             <Link
                                 href="/dashboard/settings"
                                 className="px-4 py-2 rounded-full text-gray-700 hover:bg-white/80 font-medium text-sm transition-all hover:scale-105"
                             >
-                                ⚙️ Paramètres
+                                {t.nav.settings}
                             </Link>
                         </nav>
 
@@ -177,7 +183,7 @@ export default function DashboardPage() {
                                 onClick={handleLogout}
                                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium transition-all hover:bg-gray-100 rounded-full"
                             >
-                                Déconnexion
+                                {t.nav.logout}
                             </button>
                         </div>
                     </div>
@@ -195,18 +201,17 @@ export default function DashboardPage() {
                             <div className="text-5xl animate-bounce">📱</div>
                             <div className="flex-1">
                                 <h3 className="text-xl font-bold text-white mb-2">
-                                    Ajoutez votre numéro WhatsApp !
+                                    {t.banner.title}
                                 </h3>
                                 <p className="text-white/90 mb-4 text-sm leading-relaxed">
-                                    Pour recevoir automatiquement les liens Google Meet de vos sessions de coaching par WhatsApp,
-                                    veuillez ajouter votre numéro dans vos paramètres.
+                                    {t.banner.message}
                                 </p>
                                 <div className="flex flex-wrap gap-3">
                                     <Link
                                         href="/dashboard/settings"
                                         className="bg-white text-green-600 font-bold px-6 py-3 rounded-full hover:shadow-xl transition-all hover:scale-105 inline-flex items-center gap-2"
                                     >
-                                        ⚙️ Aller aux paramètres
+                                        {t.banner.cta}
                                     </Link>
                                     <button
                                         onClick={() => {
@@ -215,7 +220,7 @@ export default function DashboardPage() {
                                         }}
                                         className="bg-white/20 text-white font-semibold px-6 py-3 rounded-full hover:bg-white/30 transition-all"
                                     >
-                                        Plus tard
+                                        {t.banner.later}
                                     </button>
                                 </div>
                             </div>
@@ -240,10 +245,10 @@ export default function DashboardPage() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-                                Bienvenue {profile?.first_name || 'Client'} ! 👋
+                                {t.welcome.title.replace('{name}', profile?.first_name || 'Client')}
                             </h1>
                             <p className="text-gray-600 text-lg">
-                                Prêt à continuer votre transformation ? Voici votre espace personnalisé.
+                                {t.welcome.subtitle}
                             </p>
                         </div>
                     </div>
@@ -263,7 +268,7 @@ export default function DashboardPage() {
                     <div className="mb-10">
                         <h2 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-3">
                             <span className="text-3xl">🎯</span>
-                            Prochaine session
+                            {t.nextSession.title}
                         </h2>
                         <SessionCard
                             session={nextSession}
@@ -282,8 +287,8 @@ export default function DashboardPage() {
                         <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                         <div className="relative z-10">
                             <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📅</div>
-                            <h3 className="text-2xl font-bold text-white mb-2">Réserver une session</h3>
-                            <p className="text-white/90">Planifiez votre prochain coaching maintenant</p>
+                            <h3 className="text-2xl font-bold text-white mb-2">{t.quickActions.book.title}</h3>
+                            <p className="text-white/90">{t.quickActions.book.subtitle}</p>
                         </div>
                     </Link>
 
@@ -294,8 +299,8 @@ export default function DashboardPage() {
                         <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                         <div className="relative z-10">
                             <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">📚</div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Historique complet</h3>
-                            <p className="text-gray-600">Consultez toutes vos sessions passées</p>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{t.quickActions.history.title}</h3>
+                            <p className="text-gray-600">{t.quickActions.history.subtitle}</p>
                         </div>
                     </Link>
                 </div>
@@ -306,13 +311,13 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
                                 <span className="text-3xl">⏱️</span>
-                                Sessions récentes
+                                {t.recentSessions.title}
                             </h2>
                             <Link
                                 href="/dashboard/sessions"
                                 className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2 group"
                             >
-                                Voir tout
+                                {t.recentSessions.viewAll}
                                 <span className="transform group-hover:translate-x-1 transition-transform">→</span>
                             </Link>
                         </div>
@@ -333,15 +338,15 @@ export default function DashboardPage() {
                 {recentSessions.length === 0 && !nextSession && (
                     <div className="bg-gradient-to-br from-white to-purple-50 rounded-3xl p-12 text-center border-2 border-purple-100 shadow-xl">
                         <div className="text-8xl mb-6 animate-bounce">🚀</div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3">C'est le moment de commencer !</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-3">{t.noSessions.title}</h3>
                         <p className="text-gray-600 mb-6 text-lg max-w-md mx-auto">
-                            Réservez votre première session et démarrez votre transformation dès aujourd'hui.
+                            {t.noSessions.message}
                         </p>
                         <Link
                             href="/dashboard/book"
                             className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-8 py-4 rounded-full hover:shadow-2xl transition-all duration-300 hover:scale-110"
                         >
-                            Réserver maintenant ✨
+                            {t.noSessions.cta}
                         </Link>
                     </div>
                 )}

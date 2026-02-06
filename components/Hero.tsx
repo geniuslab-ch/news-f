@@ -20,7 +20,8 @@ export default function Hero({ lang, ctaText, programSlug }: HeroProps) {
                     loop
                     muted
                     playsInline
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover md:object-cover"
+                    style={{ maxHeight: '100%', maxWidth: '100%', objectPosition: 'center' }}
                 >
                     <source src={videoSrc} type="video/webm" />
                     {/* Fallback for browsers that don't support video */}
