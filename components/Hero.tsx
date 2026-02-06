@@ -32,17 +32,17 @@ export default function Hero({ lang, ctaText, programSlug }: HeroProps) {
             </div>
 
             {/* CTA Button - positioned at BOTTOM */}
-            <div className="relative z-10 w-full px-4 pb-24 mb-8">
+            <div className="relative z-10 w-full px-4 pb-12 mb-4 md:pb-24 md:mb-8">
                 <div className="container mx-auto max-w-4xl text-center">
                     <a
                         href="#signup"
-                        className="inline-block bg-gradient-fitbuddy text-white font-bold text-xl md:text-2xl px-14 py-6 rounded-full hover:scale-110 transition-all duration-300 shadow-2xl hover:shadow-primary-400/50 btn-shine animate-pulse"
+                        className="inline-block bg-gradient-fitbuddy text-white font-bold text-sm px-8 py-3 rounded-full hover:scale-110 transition-all duration-300 shadow-2xl hover:shadow-primary-400/50 btn-shine animate-pulse md:text-2xl md:px-14 md:py-6"
                     >
                         {ctaText}
                     </a>
 
                     {/* USP Tagline */}
-                    <p className="mt-6 text-white font-bold text-lg md:text-xl drop-shadow-lg">
+                    <p className="mt-4 text-white font-bold text-sm md:text-xl drop-shadow-lg md:mt-6">
                         {lang === 'fr'
                             ? '8× moins cher qu\'un coach présentiel 💪'
                             : '8× cheaper than in-person coaching 💪'}
