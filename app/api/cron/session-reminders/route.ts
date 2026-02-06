@@ -65,24 +65,39 @@ export async function GET() {
             };
         }));
 
+        // ... existing code ...
+
+        // Create a debug log array to return in response
+        const debugLogs: any[] = [];
         let sent = 0;
 
         for (const session of sessions) {
             const profile = profileMap.get(session.user_id);
+            const logEntry: any = { sessionId: session.id, userId: session.user_id };
 
             if (!profile) {
                 console.log(`⚠️ No profile for session ${session.id}, user_id: ${session.user_id}`);
+                logEntry.error = 'No profile found';
+                debugLogs.push(logEntry);
                 continue;
             }
 
             if (!profile.phone) {
                 console.log(`⚠️ No phone for session ${session.id}`);
+                logEntry.error = 'No phone in profile';
+                debugLogs.push(logEntry);
                 continue;
             }
 
             // Combine date + time
             const sessionDateTime = new Date(`${session.session_date}T${session.scheduled_time || '10:00:00'}`);
             const hoursUntil = (sessionDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+            logEntry.sessionTime = sessionDateTime.toISOString();
+            logEntry.currentTime = now.toISOString();
+            logEntry.hoursUntil = hoursUntil;
+            logEntry.window = '0.5 to 24 hours';
+            logEntry.profile = { phone: profile.phone, lang: profile.language };
 
             console.log(`📍 Session ${session.id}: ${session.session_date} ${session.scheduled_time} (in ${hoursUntil.toFixed(1)}h)`);
 
@@ -100,6 +115,8 @@ export async function GET() {
                     language: profile.language || 'fr',
                 });
 
+                logEntry.twilioResult = result;
+
                 if (result.success) {
                     // Mark as sent
                     await supabase
@@ -108,22 +125,29 @@ export async function GET() {
                         .eq('id', session.id);
 
                     sent++;
+                    logEntry.status = 'Sent';
                     console.log(`✅ Reminder sent for session ${session.id} in ${profile.language || 'fr'}`);
                 } else {
+                    logEntry.status = 'Failed';
+                    logEntry.error = result.error;
                     console.error(`❌ Failed to send reminder for session ${session.id}:`, result.error);
                 }
             } else {
+                logEntry.status = 'Skipped';
+                logEntry.reason = 'Outside time window';
                 console.log(`⏭️ Session ${session.id} outside window (${hoursUntil.toFixed(1)}h)`);
             }
+            debugLogs.push(logEntry);
         }
 
         return NextResponse.json({
             sent,
             checked: sessions.length,
-            message: `Sent ${sent} reminders`
+            message: `Sent ${sent} reminders`,
+            debug: debugLogs // Include debug logs in response
         });
     } catch (error: any) {
         console.error('❌ Cron error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error.message, stack: error.stack }, { status: 500 });
     }
 }
