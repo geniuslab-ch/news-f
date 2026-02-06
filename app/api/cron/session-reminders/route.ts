@@ -89,28 +89,54 @@ export async function GET() {
                 continue;
             }
 
-            // Combine date + time
-            const sessionDateTime = new Date(`${session.session_date}T${session.scheduled_time || '10:00:00'}`);
+            // Robust date cleaning + parsing
+            let dateStr = session.session_date;
+            // If date is "YYYY-MM-DDT00:00:00", take just the date part
+            if (dateStr && dateStr.includes('T')) {
+                dateStr = dateStr.split('T')[0];
+            }
+
+            let timeStr = session.scheduled_time || '10:00:00';
+            // Ensure time is HH:MM:SS
+            if (timeStr.length === 5) timeStr += ':00';
+
+            const dateTimeString = `${dateStr}T${timeStr}`;
+            const sessionDateTime = new Date(dateTimeString);
+
+            // Check if date is valid
+            if (isNaN(sessionDateTime.getTime())) {
+                console.error(`❌ Invalid date: ${dateTimeString} for session ${session.id}`);
+                logEntry.error = `Invalid date format: ${dateTimeString}`;
+                logEntry.rawDate = session.session_date;
+                logEntry.rawTime = session.scheduled_time;
+                debugLogs.push(logEntry);
+                continue;
+            }
+
             const hoursUntil = (sessionDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
             logEntry.sessionTime = sessionDateTime.toISOString();
+            logEntry.dateTimeString = dateTimeString;
             logEntry.currentTime = now.toISOString();
             logEntry.hoursUntil = hoursUntil;
             logEntry.window = '0.5 to 24 hours';
             logEntry.profile = { phone: profile.phone, lang: profile.language };
 
-            console.log(`📍 Session ${session.id}: ${session.session_date} ${session.scheduled_time} (in ${hoursUntil.toFixed(1)}h)`);
+            console.log(`📍 Session ${session.id}: ${dateTimeString} (in ${hoursUntil.toFixed(1)}h)`);
 
             // Send reminder 30 minutes to 24 hours before
             if (hoursUntil >= 0.5 && hoursUntil <= 24) {
                 const meetingLink = session.google_meet_link || session.meeting_link || 'Lien à venir';
                 console.log(`🔗 Meeting link: ${meetingLink}`);
 
+                // Format friendly date (e.g. 06.02.2026)
+                const friendlyDate = new Date(dateStr).toLocaleDateString('fr-CH');
+
                 const result = await sendSessionReminder({
                     to: profile.phone,
                     clientName: profile.first_name || 'Client',
-                    sessionDate: new Date(session.session_date).toLocaleDateString('fr-CH'),
-                    sessionTime: session.scheduled_time?.substring(0, 5) || '10:00',
+                    sessionDate: friendlyDate,
+                    sessionTime: timeStr.substring(0, 5),
                     meetingLink,
                     language: profile.language || 'fr',
                 });
