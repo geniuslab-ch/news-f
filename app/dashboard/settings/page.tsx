@@ -77,32 +77,59 @@ export default function SettingsPage() {
                 phone: profileData.phone,
             });
 
+            // Use UPSERT instead of UPDATE to handle missing profiles
             const { data, error } = await supabase
                 .from('profiles')
-                .update({
+                .upsert({
+                    id: user.id,
                     first_name: profileData.first_name,
                     last_name: profileData.last_name,
                     phone: profileData.phone,
                     email: profileData.email,
+                    role: 'client', // Default role
+                    updated_at: new Date().toISOString(),
+                }, {
+                    onConflict: 'id',
+                    ignoreDuplicates: false
                 })
-                .eq('id', user.id)
-                .select(); // Add select to return updated data
+                .select();
 
             if (error) {
-                console.error('❌ Update error:', error);
+                console.error('❌ Upsert error:', error);
                 throw error;
             }
 
-            console.log('✅ Update successful:', data);
+            console.log('✅ Upsert successful:', data);
+
+            if (!data || data.length === 0) {
+                throw new Error('Aucune donnée retournée après la sauvegarde');
+            }
 
             // Verify the update
-            const { data: verifyData } = await supabase
+            const { data: verifyData, error: verifyError } = await supabase
                 .from('profiles')
                 .select('first_name, last_name, phone')
                 .eq('id', user.id)
                 .single();
 
+            if (verifyError) {
+                console.error('❌ Verification error:', verifyError);
+                throw new Error('Sauvegardé mais impossible de vérifier: ' + verifyError.message);
+            }
+
             console.log('🔍 Verification:', verifyData);
+
+            if (!verifyData) {
+                throw new Error('Sauvegardé mais données non trouvées lors de la vérification');
+            }
+
+            // Update local state with verified data
+            setProfileData({
+                ...profileData,
+                first_name: verifyData.first_name || '',
+                last_name: verifyData.last_name || '',
+                phone: verifyData.phone || '',
+            });
 
             alert('✅ Profil mis à jour avec succès!');
         } catch (error: any) {
