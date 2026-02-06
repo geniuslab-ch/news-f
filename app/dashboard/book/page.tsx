@@ -11,6 +11,7 @@ import type { Package } from '@/lib/supabase-helpers';
 export default function BookPage() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
+    const [profile, setProfile] = useState<any>(null);
     const [activePackage, setActivePackage] = useState<Package | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedType, setSelectedType] = useState<'discovery' | 'coaching' | 'coaching_followup'>('coaching_followup');
@@ -30,6 +31,15 @@ export default function BookPage() {
 
             setUser(user);
 
+            // Get profile data for phone number
+            const { data: profileData } = await supabase
+                .from('profiles')
+                .select('first_name, last_name, phone')
+                .eq('id', user.id)
+                .single();
+
+            setProfile(profileData);
+
             // Get active package
             const { data: packageData } = await getActivePackage(user.id);
             setActivePackage(packageData);
@@ -46,12 +56,17 @@ export default function BookPage() {
         router.push('/login');
     };
 
-    // Build Cal.com URL with user info
+    // Build Cal.com URL with user info including phone number
+    const userName = profile?.first_name || user?.user_metadata?.first_name || '';
+    const userEmail = user?.email || '';
+    const userPhone = profile?.phone || '';
+
     const calLink = selectedType === 'discovery'
-        ? `https://app.cal.eu/fitbuddy/15min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`
+        ? `https://app.cal.eu/fitbuddy/15min?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}`
         : selectedType === 'coaching_followup'
-            ? `https://app.cal.eu/fitbuddy/session-coaching-suivi-45-min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`
-            : `https://app.cal.eu/fitbuddy/45min?email=${user?.email || ''}&name=${user?.user_metadata?.first_name || ''}`;
+            ? `https://app.cal.eu/fitbuddy/session-coaching-suivi-45-min?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}`
+            : `https://app.cal.eu/fitbuddy/45min?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}`;
+
 
     if (loading) {
         return (
