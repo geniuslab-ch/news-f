@@ -154,8 +154,6 @@ export async function GET() {
                     language: profile.language || 'fr',
                 });
 
-                logEntry.twilioResult = result;
-
                 if (result.success) {
                     // Mark as sent
                     await supabase
@@ -164,29 +162,22 @@ export async function GET() {
                         .eq('id', session.id);
 
                     sent++;
-                    logEntry.status = 'Sent';
                     console.log(`✅ Reminder sent for session ${session.id} in ${profile.language || 'fr'}`);
                 } else {
-                    logEntry.status = 'Failed';
-                    logEntry.error = result.error;
                     console.error(`❌ Failed to send reminder for session ${session.id}:`, result.error);
                 }
             } else {
-                logEntry.status = 'Skipped';
-                logEntry.reason = 'Outside time window';
                 console.log(`⏭️ Session ${session.id} outside window (${hoursUntil.toFixed(1)}h)`);
             }
-            debugLogs.push(logEntry);
         }
 
         return NextResponse.json({
             sent,
             checked: sessions.length,
-            message: `Sent ${sent} reminders`,
-            debug: debugLogs // Include debug logs in response
+            message: `Sent ${sent} reminders`
         });
     } catch (error: any) {
         console.error('❌ Cron error:', error);
-        return NextResponse.json({ error: error.message, stack: error.stack }, { status: 500 });
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
