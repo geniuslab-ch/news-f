@@ -70,7 +70,14 @@ export default function SettingsPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Non authentifié');
 
-            const { error } = await supabase
+            console.log('💾 Saving profile for user:', user.id);
+            console.log('📝 Data to save:', {
+                first_name: profileData.first_name,
+                last_name: profileData.last_name,
+                phone: profileData.phone,
+            });
+
+            const { data, error } = await supabase
                 .from('profiles')
                 .update({
                     first_name: profileData.first_name,
@@ -78,12 +85,28 @@ export default function SettingsPage() {
                     phone: profileData.phone,
                     email: profileData.email,
                 })
-                .eq('id', user.id);
+                .eq('id', user.id)
+                .select(); // Add select to return updated data
 
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Update error:', error);
+                throw error;
+            }
+
+            console.log('✅ Update successful:', data);
+
+            // Verify the update
+            const { data: verifyData } = await supabase
+                .from('profiles')
+                .select('first_name, last_name, phone')
+                .eq('id', user.id)
+                .single();
+
+            console.log('🔍 Verification:', verifyData);
 
             alert('✅ Profil mis à jour avec succès!');
         } catch (error: any) {
+            console.error('💥 Save error:', error);
             alert('Erreur: ' + (error.message || 'Impossible de sauvegarder'));
         } finally {
             setSaving(false);
